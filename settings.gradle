@@ -1,0 +1,5 @@
+rootProject.name = 'server-local'
+include 'admin-service'
+include 'creator-service'
+include 'utils'
+
