@@ -23,7 +23,6 @@ public class RESTValidationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) {
-        logger.info("preHandle for : {}", object);
         return true;
     }
 

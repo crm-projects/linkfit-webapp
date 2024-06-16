@@ -1,6 +1,7 @@
 package com.server.storefront.controller;
 
 import com.server.storefront.model.Plan;
+import com.server.storefront.model.Platform;
 import com.server.storefront.service.AdminService;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.json.AbstractJsonResponse;
@@ -8,8 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +31,14 @@ public class AdminController {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
 
+    @RequestMapping(value = "/savePlatformItems", method = RequestMethod.POST)
+    public @ResponseBody AbstractJsonResponse<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {
+        try {
+            return Util.getJsonResponse(request, adminService.savePlatformItems(platform));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 }

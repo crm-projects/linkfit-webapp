@@ -1,9 +1,7 @@
 package com.server.storefront.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
-
 
 import java.time.LocalDateTime;
 import java.util.UUID;

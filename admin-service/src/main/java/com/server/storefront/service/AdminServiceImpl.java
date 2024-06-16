@@ -1,7 +1,9 @@
 package com.server.storefront.service;
 
 import com.server.storefront.model.Plan;
+import com.server.storefront.model.Platform;
 import com.server.storefront.repository.PlanRepository;
+import com.server.storefront.repository.PlatformRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,9 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     PlanRepository planRepository;
 
+    @Autowired
+    PlatformRepository platformRepository;
+
     @Override
     @Transactional
     public boolean savePlanDetails(Plan plan) {
@@ -24,6 +29,14 @@ public class AdminServiceImpl implements AdminService {
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public Platform savePlatformItems(Platform platform) {
+        try {
+            return platformRepository.save(platform);
+        } catch (Exception ex ) {
+            throw  new RuntimeException(ex.getMessage());
         }
     }
 }

@@ -1,14 +1,13 @@
 package com.server.storefront.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.sql.Date;
 import java.util.UUID;
 
 @Data
@@ -32,12 +31,10 @@ public class Creator {
     @Column(name = "GENDER")
     private String gender;
 
+    @Column(name = "DATE_OF_BIRTH")
+    private Date dateOfBirth;
+
     @OneToOne(mappedBy = "creator", cascade = CascadeType.ALL)
     private CreatorPlanMapping creatorPlanMapping;
-
-    @Nullable
-    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
-    private List<CreatorSocialMediaMapping> socialMediaMappingList;
-
 
 }

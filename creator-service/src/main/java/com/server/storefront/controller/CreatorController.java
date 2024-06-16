@@ -4,11 +4,13 @@ import com.server.storefront.model.Creator;
 import com.server.storefront.model.CreatorLite;
 import com.server.storefront.service.CreatorService;
 import com.server.storefront.utils.Util;
+import com.server.storefront.utils.exception.CreatorException;
 import com.server.storefront.utils.json.AbstractJsonResponse;
+import com.server.storefront.utils.holder.SignUp;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,25 +21,30 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/creator")
 public class CreatorController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CreatorController.class);
 
     @Autowired
-    private CreatorService creatorService;
+    CreatorService creatorService;
 
-    @RequestMapping(value = "/saveCreator", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Boolean> saveCreatorLogin(@RequestBody CreatorLite creatorLite, HttpServletRequest request) {
+    @RequestMapping(value = "/auth", method = RequestMethod.POST)
+    public @ResponseBody SignUp authenticateCreator(@RequestBody SignUp signUp, HttpServletRequest request)
+            throws CreatorException {
+        logger.info("Preparing Authentication for user: {}", signUp.getUserName());
         try {
-            return Util.getJsonResponse(request, creatorService.saveUpdateCreatorDetails(creatorLite));
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            return creatorService.authenticateCreator(signUp);
+        } catch (Exception ex) {
+            logger.error("Error: {} while authenticating User: {}", ex.getMessage(), signUp.getUserName());
+            throw new CreatorException(ex.getMessage());
         }
     }
 
-    @RequestMapping(value = "/saveCreatorPlatform", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Creator> saveCreatorPlatformDetails(@RequestBody CreatorLite creatorLite, HttpServletRequest request) {
+    @RequestMapping(value = "/saveCreatorProfileLiteSettings", method = RequestMethod.POST)
+    public @ResponseBody AbstractJsonResponse<Creator> saveCreatorProfileLiteSettings(@RequestBody CreatorLite creatorLite, HttpServletRequest request)
+            throws CreatorException {
         try {
-            return Util.getJsonResponse(request, creatorService.saveUpdatePlatformDetails(creatorLite));
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            return Util.getJsonResponse(request, creatorService.saveUpdateCreatorProfileSettings(creatorLite));
+        } catch (CreatorException ex) {
+            throw new CreatorException(ex.getMessage());
         }
     }
 

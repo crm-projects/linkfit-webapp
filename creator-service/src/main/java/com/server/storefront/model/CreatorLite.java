@@ -15,6 +15,10 @@ import java.util.List;
 public class CreatorLite {
 
     @Nonnull
+    @JsonProperty("creatorId")
+    private String creatorId;
+
+    @Nonnull
     @JsonProperty("userName")
     private String userName;
 
@@ -29,11 +33,7 @@ public class CreatorLite {
     @JsonProperty("isExistingCreator")
     private boolean isExistingCreator;
 
-    @Nonnull
     @JsonProperty("selectedPlan")
     private PlanLite plan;
 
-    @Nullable
-    @JsonProperty("socialMediaProfiles")
-    private List<PlatformLite> platformsList;
 }
