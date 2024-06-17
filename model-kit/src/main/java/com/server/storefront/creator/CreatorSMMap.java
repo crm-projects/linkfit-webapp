@@ -1,5 +1,6 @@
-package com.server.storefront.model;
+package com.server.storefront.creator;
 
+import com.server.storefront.admin.Platform;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,9 @@ public class CreatorSMMap {
 
     @Column(name = "SOCIAL_MEDIA_ID")
     private String socialMediaId;
+
+    @Column(name = "PROFILE_URL")
+    private String profileURL;
 
     @Column(name = "IS_LINKED_IND")
     private boolean linkedInd;

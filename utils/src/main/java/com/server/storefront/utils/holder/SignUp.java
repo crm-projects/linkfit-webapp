@@ -1,5 +1,6 @@
 package com.server.storefront.utils.holder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,5 +30,6 @@ public class SignUp {
     @JsonProperty("inputOTP")
     private String inputOTP;
 
+    @JsonIgnore
     private boolean hasAuthToken;
 }

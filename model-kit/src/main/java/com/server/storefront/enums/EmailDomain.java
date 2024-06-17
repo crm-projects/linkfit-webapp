@@ -1,4 +1,4 @@
-package com.server.storefront.utils.holder;
+package com.server.storefront.enums;
 
 public enum EmailDomain {
 

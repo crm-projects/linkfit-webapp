@@ -1,5 +1,6 @@
-package com.server.storefront.model;
+package com.server.storefront.creator;
 
+import com.server.storefront.admin.Plan;
 import jakarta.persistence.*;
 import lombok.Data;
 

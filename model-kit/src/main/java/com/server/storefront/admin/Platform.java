@@ -1,4 +1,4 @@
-package com.server.storefront.model;
+package com.server.storefront.admin;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

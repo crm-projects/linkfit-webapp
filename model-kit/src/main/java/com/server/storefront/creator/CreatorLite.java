@@ -1,20 +1,21 @@
-package com.server.storefront.model;
+package com.server.storefront.creator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.server.storefront.admin.PlanLite;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.sql.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreatorLite {
 
-    @Nonnull
+    @Nullable
     @JsonProperty("creatorId")
     private String creatorId;
 
@@ -30,8 +31,17 @@ public class CreatorLite {
     @JsonProperty("gender")
     private String gender;
 
-    @JsonProperty("isExistingCreator")
-    private boolean isExistingCreator;
+    @Nullable
+    @JsonProperty("dob")
+    private Date dateOfBirth;
+
+    @Nullable
+    @JsonProperty("description")
+    private String description;
+
+    @Nullable
+    @JsonProperty("displayPicURL")
+    private String displayPicURL;
 
     @JsonProperty("selectedPlan")
     private PlanLite plan;

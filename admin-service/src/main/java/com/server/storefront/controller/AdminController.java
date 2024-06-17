@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.model.Plan;
-import com.server.storefront.model.Platform;
+import com.server.storefront.admin.Plan;
+import com.server.storefront.admin.Platform;
 import com.server.storefront.service.AdminService;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.json.AbstractJsonResponse;

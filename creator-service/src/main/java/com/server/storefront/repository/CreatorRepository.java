@@ -1,7 +1,6 @@
 package com.server.storefront.repository;
 
-import com.server.storefront.model.Creator;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.server.storefront.creator.Creator;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
