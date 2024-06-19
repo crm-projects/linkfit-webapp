@@ -23,6 +23,8 @@ public class RESTValidationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) {
+
+        request.setAttribute("StorefrontUser","true");
         return true;
     }
 

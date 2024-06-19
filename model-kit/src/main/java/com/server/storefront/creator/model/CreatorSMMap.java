@@ -1,6 +1,6 @@
-package com.server.storefront.creator;
+package com.server.storefront.creator.model;
 
-import com.server.storefront.admin.Platform;
+import com.server.storefront.admin.model.Platform;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

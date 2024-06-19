@@ -1,4 +1,4 @@
-package com.server.storefront.admin;
+package com.server.storefront.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

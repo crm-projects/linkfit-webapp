@@ -1,7 +1,7 @@
-package com.server.storefront.creator;
+package com.server.storefront.creator.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.server.storefront.admin.PlanLite;
+import com.server.storefront.admin.model.PlanLite;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;

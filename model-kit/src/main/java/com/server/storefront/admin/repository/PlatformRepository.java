@@ -1,6 +1,6 @@
-package com.server.storefront.repository;
+package com.server.storefront.admin.repository;
 
-import com.server.storefront.admin.Platform;
+import com.server.storefront.admin.model.Platform;
 import org.springframework.stereotype.Repository;
 
 @Repository

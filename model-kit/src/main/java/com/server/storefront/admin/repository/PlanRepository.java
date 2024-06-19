@@ -1,6 +1,6 @@
-package com.server.storefront.repository;
+package com.server.storefront.admin.repository;
 
-import com.server.storefront.admin.Plan;
+import com.server.storefront.admin.model.Plan;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.server.storefront.utils.holder;
+package com.server.storefront.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,11 +15,17 @@ import java.sql.Date;
 @Builder
 public class SignUp {
 
+    @JsonProperty("id")
+    private String creatorId;
+
     @JsonProperty("userName")
     private String userName;
 
     @JsonProperty("userEmail")
     private String userEmail;
+
+    @JsonProperty("password")
+    private String password;
 
     @JsonProperty("dob")
     private Date dateOfBirth;

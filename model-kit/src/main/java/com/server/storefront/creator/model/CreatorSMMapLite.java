@@ -1,4 +1,4 @@
-package com.server.storefront.creator;
+package com.server.storefront.creator.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;

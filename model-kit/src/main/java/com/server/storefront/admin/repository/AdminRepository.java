@@ -1,4 +1,4 @@
-package com.server.storefront.repository;
+package com.server.storefront.admin.repository;
 
 import org.springframework.data.repository.CrudRepository;
 

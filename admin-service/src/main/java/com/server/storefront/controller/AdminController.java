@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.admin.Plan;
-import com.server.storefront.admin.Platform;
+import com.server.storefront.admin.model.Plan;
+import com.server.storefront.admin.model.Platform;
 import com.server.storefront.service.AdminService;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.json.AbstractJsonResponse;
@@ -24,7 +24,7 @@ public class AdminController {
     @Autowired
     AdminService adminService;
 
-    @RequestMapping(value = "/savePlanDetails", method = RequestMethod.POST)
+    @RequestMapping(value = "/plan/save", method = RequestMethod.POST)
     public @ResponseBody AbstractJsonResponse<Boolean> savePlanDetails(@RequestBody Plan plan, HttpServletRequest request) {
         try {
             return Util.getJsonResponse(request, adminService.savePlanDetails(plan));
@@ -33,7 +33,7 @@ public class AdminController {
         }
     }
 
-    @RequestMapping(value = "/savePlatformItems", method = RequestMethod.POST)
+    @RequestMapping(value = "/platform/save", method = RequestMethod.POST)
     public @ResponseBody AbstractJsonResponse<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {
         try {
             return Util.getJsonResponse(request, adminService.savePlatformItems(platform));

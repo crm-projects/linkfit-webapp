@@ -1,29 +1,35 @@
 package com.server.storefront.service;
 
-import com.server.storefront.admin.Plan;
-import com.server.storefront.creator.Creator;
-import com.server.storefront.creator.CreatorLite;
-import com.server.storefront.creator.CreatorPlanMapping;
+import com.server.storefront.admin.model.Plan;
+import com.server.storefront.creator.model.Creator;
+import com.server.storefront.creator.model.CreatorLite;
+import com.server.storefront.creator.model.CreatorPlanMapping;
 import com.server.storefront.enums.PlanControl;
-import com.server.storefront.repository.CreatorRepository;
-import com.server.storefront.repository.PlanRepository;
+import com.server.storefront.creator.repository.CreatorRepository;
+import com.server.storefront.admin.repository.PlanRepository;
 import com.server.storefront.utils.ApplicationConstants;
 import com.server.storefront.utils.EmailConstants;
 import com.server.storefront.utils.OTPGenerator;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.exception.CreatorException;
+import com.server.storefront.utils.exception.RandomGeneratorException;
 import com.server.storefront.utils.helper.EmailSender;
 import com.server.storefront.enums.EmailDomain;
 import com.server.storefront.utils.holder.OTPHolder;
-import com.server.storefront.utils.holder.SignUp;
+import com.server.storefront.auth.SignIn;
+import com.server.storefront.auth.SignUp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,72 +49,146 @@ public class CreatorServiceImpl implements CreatorService {
     @Autowired
     EmailSender emailSender;
 
-    @Override
-    @Transactional
-    public Creator saveUpdateCreatorProfileSettings(CreatorLite creatorLite, boolean isExistingCreator) throws CreatorException {
-        try {
-            if (creatorLite == null) {
-                throw new CreatorException("Creator Object is Null");
-            }
-            Creator creator = (isExistingCreator) ? creatorRepository.findById(creatorLite.getCreatorId()).get() : new Creator();
+    private final PasswordEncoder passwordEncoder;
 
-            creator.setUserName(creatorLite.getUserName());
-            creator.setEmailAddress(creatorLite.getEmailAddress());
-            creator.setGender(creatorLite.getGender());
-            creator.setDateOfBirth(creatorLite.getDateOfBirth());
-            creator.setDisplayPicURL(creatorLite.getDisplayPicURL());
-            creator.setDescription(creatorLite.getDescription());
+    private final AuthenticationManager authenticationManager;
 
-            Plan plan = new Plan();
-            if (creatorLite.getPlan() != null && StringUtils.hasText(creatorLite.getPlan().getPlanId())) {
-                int expiryDate = PlanControl.valueOf(ApplicationConstants.BASE_PLAN).getExpiryDate();
-                plan = planRepository.findById(creatorLite.getPlan().getPlanId()).get();
-                validateCreatorPlanDetails(plan, creator, creatorLite.getPlan().isActiveInd(), creatorLite.getPlan().isFreeTrial(), expiryDate);
-            }
-            return creatorRepository.save(creator);
-        } catch (Exception e) {
-            throw new CreatorException(e.getMessage());
-        }
+    public CreatorServiceImpl(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
-    public SignUp authenticateCreator(SignUp authObj) throws CreatorException {
-        boolean isAuth = false;
-        try {
-            if (authObj == null) {
-                logger.error("Input Object is Null");
-                throw new CreatorException("Invalid Login Details");
-            }
-            if (authObj.isHasOTPInput() && authObj.isHasAuthToken()) {
-                String generatedOTP = otpHolder.getOTPByEmailAddress(authObj.getUserEmail());
-                isAuth = generatedOTP.equalsIgnoreCase(authObj.getInputOTP());
-                if (isAuth) {
-                    logger.info("Processing Creator Object for: {} ", authObj.getUserEmail());
-                    scrubAndSaveCreatorItem(authObj);
-                }
-            } else {
-                boolean isValid = isValidEmailDomain(authObj.getUserEmail());
-                if (isValid) {
-                    String OTP = OTPGenerator.generateOTP(authObj.getUserEmail());
-                    otpHolder.updateEmailOTPMap(authObj.getUserEmail(), OTP);
-                    prepareAuthenticationMail(authObj.getUserEmail(), OTP);
-                    authObj.setHasAuthToken(true);
-                }
-            }
-        } catch (Exception e) {
-            throw new CreatorException(e.getMessage());
+    @Transactional
+    public SignUp creatorSignUp(SignUp authObj) throws CreatorException, RandomGeneratorException {
+        if (authObj == null) {
+            throw new CreatorException("Invalid Login Details");
+        }
+        boolean postProcess = (authObj.isHasOTPInput() && authObj.isHasAuthToken());
+        return (postProcess) ? validateAndSaveCreator(authObj) : prepareEmailAuthentication(authObj);
+    }
+
+    private SignUp prepareEmailAuthentication(SignUp authObj) throws RandomGeneratorException {
+        boolean isValid = isValidEmailDomain(authObj.getUserEmail());
+        if (isValid) {
+            logger.info("Valid Email Entered By User :{} ", authObj.getUserEmail());
+
+            String OTP = OTPGenerator.generateOTP(authObj.getUserEmail());
+            otpHolder.updateEmailOTPMap(authObj.getUserEmail(), OTP);
+            prepareAuthenticationMail(authObj.getUserEmail(), OTP);
+            authObj.setHasAuthToken(true);
         }
         return authObj;
     }
 
     @Transactional
-    private void scrubAndSaveCreatorItem(SignUp authObj) {
+    private SignUp validateAndSaveCreator(SignUp authObj) {
+        boolean isAuth = false;
+        String generatedOTP = otpHolder.getOTPByEmailAddress(authObj.getUserEmail());
+        isAuth = generatedOTP.equalsIgnoreCase(authObj.getInputOTP());
+        if (isAuth) {
+            logger.info("OTP Successfully Entered By User :{} ", authObj.getUserEmail());
+            Creator creator = scrubAndSaveCreatorItem(authObj);
+            authObj.setCreatorId(creator.getId());
+        } else {
+            logger.info("Invalid OTP Entered By User :{}", authObj.getUserEmail());
+        }
+        return authObj;
+    }
+
+    @Override
+    public Creator creatorSignIn(SignIn authObj) {
+        return validateCreateSignIn(authObj).get();
+    }
+
+    private Optional<Creator> validateCreateSignIn(SignIn authObj) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authObj.getUserEmail(),
+                        authObj.getUserPassword()
+                )
+        );
+        return creatorRepository.findCreatorByEmailAddress(authObj.getUserEmail());
+    }
+
+    @Override
+    @Transactional
+    public Creator saveCreatorProfile(CreatorLite creatorLite) throws CreatorException {
+        try {
+            if (creatorLite == null) {
+                throw new RuntimeException("Null Object is Passed");
+            }
+            boolean isExistingCreator = StringUtils.hasText(creatorLite.getCreatorId());
+            Creator creator = (isExistingCreator) ?
+                    creatorRepository.findById(creatorLite.getCreatorId()).get() : new Creator();
+            scrubCreatorProfileItems(creator, creatorLite);
+            return saveUpdateCreatorProfileSettings(creator, isExistingCreator);
+        } catch (Exception e) {
+            throw new CreatorException(e.getMessage());
+        }
+    }
+
+    private void scrubCreatorProfileItems(Creator creator, CreatorLite creatorLite) {
+        creator.setDescription(creator.getDescription());
+        creator.setUserName(creatorLite.getUserName());
+        creator.setDateOfBirth(creatorLite.getDateOfBirth());
+        creator.setDisplayPicURL(creatorLite.getDisplayPicURL());
+        creator.setGender(creatorLite.getGender());
+
+        if (StringUtils.hasText(creatorLite.getPlan().getPlanId())) {
+            CreatorPlanMapping planMapping = new CreatorPlanMapping();
+            Optional<Plan> plan = planRepository.findById(creatorLite.getPlan().getPlanId());
+            if (plan.isPresent()) {
+                planMapping.setPlan(plan.get());
+                planMapping.setFreeTrial(creatorLite.getPlan().isFreeTrial());
+                planMapping.setActiveInd(creatorLite.getPlan().isFreeTrial());
+                planMapping.setCreator(creator);
+            }
+            creator.setCreatorPlanMapping(planMapping);
+        }
+    }
+
+    @Transactional
+    public Creator saveUpdateCreatorProfileSettings(Creator creator, boolean isExistingCreator) {
+
+        if (isExistingCreator) {
+            Creator existingCreator = creatorRepository.findById(creator.getId()).get();
+            existingCreator.setUserName(creator.getUsername());
+            existingCreator.setEmailAddress(creator.getEmailAddress());
+            existingCreator.setGender(creator.getGender());
+            existingCreator.setDateOfBirth(creator.getDateOfBirth());
+            existingCreator.setDisplayPicURL(creator.getDisplayPicURL());
+            existingCreator.setDescription(creator.getDescription());
+            existingCreator.setActiveInd(true);
+            existingCreator.setCreatorPlanMapping(creator.getCreatorPlanMapping());
+
+            creatorRepository.save(existingCreator);
+            logger.info("Successfully Updated Creator Profile Settings for id :{}", creator.getId());
+            return existingCreator;
+        } else {
+            creator.setUserName(creator.getUsername());
+            creator.setEmailAddress(creator.getEmailAddress());
+            creator.setGender(creator.getGender());
+            creator.setDateOfBirth(creator.getDateOfBirth());
+            creator.setDisplayPicURL(creator.getDisplayPicURL());
+            creator.setDescription(creator.getDescription());
+            creator.setCreatorPlanMapping(creator.getCreatorPlanMapping());
+            creator.setActiveInd(true);
+
+            creatorRepository.save(creator);
+            logger.info("Successfully Saved Creator Profile Settings for id :{}", creator.getId());
+            return creator;
+        }
+    }
+
+    @Transactional
+    private Creator scrubAndSaveCreatorItem(SignUp authObj) {
         Creator creator = new Creator();
         creator.setId(UUID.randomUUID().toString());
         creator.setUserName(authObj.getUserName());
         creator.setEmailAddress(authObj.getUserEmail());
         creator.setDateOfBirth(authObj.getDateOfBirth());
-
+        creator.setActiveInd(true);
         CreatorPlanMapping creatorPlanMapping = new CreatorPlanMapping();
         Plan planObj = planRepository.getPlanByName(ApplicationConstants.BASE_PLAN);
         if (planObj != null) {
@@ -116,7 +196,7 @@ public class CreatorServiceImpl implements CreatorService {
             validateCreatorPlanDetails(planObj, creator, true, true, expiryDate);
         }
         logger.info("Saving Creator Object with Id: {} ", creator.getId());
-        creatorRepository.save(creator);
+        return creatorRepository.save(creator);
     }
 
     private void prepareAuthenticationMail(String userEmail, String otp) {
@@ -144,5 +224,22 @@ public class CreatorServiceImpl implements CreatorService {
             creator.setCreatorPlanMapping(creatorPlanMapping);
         }
     }
+
+    @Override
+    @Transactional
+    public Creator deleteCreatorProfile(CreatorLite creatorLite) {
+        if (!StringUtils.hasText(creatorLite.getCreatorId())) {
+            throw new RuntimeException("Placeholder Error Message");
+        }
+
+        Creator existingCreator = null;
+        existingCreator = creatorRepository.findById(creatorLite.getCreatorId()).get();
+        existingCreator.setActiveInd(false);
+        creatorRepository.save(existingCreator);
+
+        logger.info("Deleted Creator Profile for id :{}", existingCreator.getId());
+        return existingCreator;
+    }
+
 }
 

@@ -1,13 +1,19 @@
 package com.server.storefront.service;
 
-import com.server.storefront.creator.Creator;
-import com.server.storefront.creator.CreatorLite;
+import com.server.storefront.creator.model.Creator;
+import com.server.storefront.creator.model.CreatorLite;
 import com.server.storefront.utils.exception.CreatorException;
-import com.server.storefront.utils.holder.SignUp;
+import com.server.storefront.utils.exception.RandomGeneratorException;
+import com.server.storefront.auth.SignIn;
+import com.server.storefront.auth.SignUp;
 
 public interface CreatorService {
 
-    Creator saveUpdateCreatorProfileSettings(CreatorLite creatorLite, boolean isExistingCreator) throws CreatorException;
+    SignUp creatorSignUp(SignUp authObj) throws CreatorException, RandomGeneratorException;
 
-    SignUp authenticateCreator(SignUp authObj) throws CreatorException;
+    Creator creatorSignIn(SignIn authObj);
+
+    Creator saveCreatorProfile(CreatorLite creatorLite) throws CreatorException;
+
+    Creator deleteCreatorProfile(CreatorLite creatorLite);
 }

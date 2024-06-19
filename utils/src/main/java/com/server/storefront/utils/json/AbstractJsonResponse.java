@@ -2,11 +2,11 @@ package com.server.storefront.utils.json;
 
 public abstract class AbstractJsonResponse<T> {
 
-    private T wrapped;
+    private T responseData;
 
-    protected AbstractJsonResponse(T wrapped) { this.wrapped = wrapped; }
+    protected AbstractJsonResponse(T responseData) { this.responseData = responseData; }
 
-    public T getWrapped() {
-        return wrapped;
+    public T getResponseData() {
+        return responseData;
     }
 }
