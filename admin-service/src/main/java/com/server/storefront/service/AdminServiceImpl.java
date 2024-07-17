@@ -5,16 +5,15 @@ import com.server.storefront.model.admin.Plan;
 import com.server.storefront.model.admin.Platform;
 import com.server.storefront.repository.PlanRepository;
 import com.server.storefront.repository.PlatformRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    private static Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     @Autowired
     PlanRepository planRepository;

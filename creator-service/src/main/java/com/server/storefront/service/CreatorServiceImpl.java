@@ -18,8 +18,7 @@ import com.server.storefront.model.enums.EmailDomain;
 import com.server.storefront.utils.holder.OTPHolder;
 import com.server.storefront.model.auth.SignIn;
 import com.server.storefront.model.auth.SignUp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +28,10 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class CreatorServiceImpl implements CreatorService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CreatorServiceImpl.class);
 
     @Autowired
     CreatorRepository creatorRepository;
@@ -60,7 +59,7 @@ public class CreatorServiceImpl implements CreatorService {
     private SignUp prepareEmailAuthentication(SignUp authObj) throws RandomGeneratorException {
         boolean isValid = isValidEmailDomain(authObj.getUserEmail());
         if (isValid) {
-            logger.info("Valid Email Entered By User :{} ", authObj.getUserEmail());
+            log.info("Valid Email Entered By User :{} ", authObj.getUserEmail());
 
             String OTP = OTPGenerator.generateOTP(authObj.getUserEmail());
             otpHolder.updateEmailOTPMap(authObj.getUserEmail(), OTP);
@@ -76,11 +75,11 @@ public class CreatorServiceImpl implements CreatorService {
         String generatedOTP = otpHolder.getOTPByEmailAddress(authObj.getUserEmail());
         isAuth = generatedOTP.equalsIgnoreCase(authObj.getInputOTP());
         if (isAuth) {
-            logger.info("OTP Successfully Entered By User :{} ", authObj.getUserEmail());
+            log.info("OTP Successfully Entered By User :{} ", authObj.getUserEmail());
             Creator creator = scrubAndSaveCreatorItem(authObj);
             authObj.setCreatorId(creator.getId());
         } else {
-            logger.info("Invalid OTP Entered By User :{}", authObj.getUserEmail());
+            log.info("Invalid OTP Entered By User :{}", authObj.getUserEmail());
         }
         return authObj;
     }
@@ -145,7 +144,7 @@ public class CreatorServiceImpl implements CreatorService {
             existingCreator.setCreatorPlanMapping(creator.getCreatorPlanMapping());
 
             creatorRepository.save(existingCreator);
-            logger.info("Successfully Updated Creator Profile Settings for id :{}", creator.getId());
+            log.info("Successfully Updated Creator Profile Settings for id :{}", creator.getId());
             return existingCreator;
         } else {
             creator.setEmailAddress(creator.getEmailAddress());
@@ -157,7 +156,7 @@ public class CreatorServiceImpl implements CreatorService {
             creator.setActiveInd(true);
 
             creatorRepository.save(creator);
-            logger.info("Successfully Saved Creator Profile Settings for id :{}", creator.getId());
+            log.info("Successfully Saved Creator Profile Settings for id :{}", creator.getId());
             return creator;
         }
     }
@@ -176,18 +175,18 @@ public class CreatorServiceImpl implements CreatorService {
             int expiryDate = PlanControl.valueOf(ApplicationConstants.BASE_PLAN).getExpiryDate();
             validateCreatorPlanDetails(planObj, creator, true, true, expiryDate);
         }
-        logger.info("Saving Creator Object with Id: {} ", creator.getId());
+        log.info("Saving Creator Object with Id: {} ", creator.getId());
         return creatorRepository.save(creator);
     }
 
     private void prepareAuthenticationMail(String userEmail, String otp) {
-        logger.info("Preparing Email Message for OTP Verification to User: {} ", userEmail);
+        log.info("Preparing Email Message for OTP Verification to User: {} ", userEmail);
         String subject = EmailConstants.OTP_AUTH_SUBJECT;
         emailSender.sendEmailNotification(userEmail, subject, otp);
     }
 
     private boolean isValidEmailDomain(String userEmail) {
-        logger.info("Email Domain Validation for Authentication");
+        log.info("Email Domain Validation for Authentication");
         int fromIndex = userEmail.indexOf("@");
         int endIndex = userEmail.length();
         String inputDomain = userEmail.substring(fromIndex, endIndex);
@@ -218,7 +217,7 @@ public class CreatorServiceImpl implements CreatorService {
         existingCreator.setActiveInd(false);
         creatorRepository.save(existingCreator);
 
-        logger.info("Deleted Creator Profile for id :{}", existingCreator.getId());
+        log.info("Deleted Creator Profile for id :{}", existingCreator.getId());
         return existingCreator;
     }
 

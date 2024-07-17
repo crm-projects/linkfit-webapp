@@ -10,17 +10,17 @@ import com.server.storefront.utils.json.AbstractJsonResponse;
 import com.server.storefront.model.auth.SignUp;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.log;
+import org.slf4j.logFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/creator")
+@Slf4j
 public class CreatorServiceController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CreatorServiceController.class);
 
     @Autowired
     CreatorService creatorService;
@@ -28,14 +28,14 @@ public class CreatorServiceController {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public AbstractJsonResponse<SignUp> creatorSignUp(@RequestBody SignUp authObj, HttpServletRequest request)
             throws CreatorException, ServletException, Exception {
-        logger.info("Preparing Authentication for user: {}", authObj.getUserName());
+        log.info("Preparing Authentication for user: {}", authObj.getUserName());
         try {
             if (authObj == null) {
                 throw new ServletException("No authObj Supplied");
             }
             return Util.getJsonResponse(request, creatorService.creatorSignUp(authObj));
         } catch (CreatorException | ServletException ex) {
-            logger.error("Error: {} while authenticating User: {}", ex.getMessage(), authObj.getUserName());
+            log.error("Error: {} while authenticating User: {}", ex.getMessage(), authObj.getUserName());
             throw new CreatorException(ex.getMessage());
         }
     }
@@ -43,14 +43,14 @@ public class CreatorServiceController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public AbstractJsonResponse<Creator> creatorLogin(@RequestBody SignIn authObj, HttpServletRequest request)
             throws CreatorException, ServletException, Exception {
-        logger.info("Preparing Login for user: {}", authObj.getUserEmail());
+        log.info("Preparing Login for user: {}", authObj.getUserEmail());
         try {
             if (authObj == null) {
                 throw new ServletException("No authObj Supplied");
             }
             return Util.getJsonResponse(request, creatorService.creatorSignIn(authObj));
         } catch (ServletException ex) {
-            logger.error("Error: {} while authenticating User: {}", ex.getMessage(), authObj.getUserEmail());
+            log.error("Error: {} while authenticating User: {}", ex.getMessage(), authObj.getUserEmail());
             throw new CreatorException(ex.getMessage());
         }
     }

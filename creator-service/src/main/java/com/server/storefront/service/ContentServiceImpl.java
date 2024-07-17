@@ -6,8 +6,7 @@ import com.server.storefront.repository.ContentRepository;
 import com.server.storefront.repository.CreatorRepository;
 import com.server.storefront.repository.PlatformRepository;
 import com.server.storefront.repository.ScriptRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +18,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ContentServiceImpl implements ContentService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
     @Autowired
     private ContentRepository contentRepository;
@@ -64,7 +63,7 @@ public class ContentServiceImpl implements ContentService {
         existingContent.setContentModifiedTime(now);
         contentRepository.save(existingContent);
 
-        logger.info("Deleted Content for id :{}", existingContent.getId());
+        log.info("Deleted Content for id :{}", existingContent.getId());
         return existingContent;
     }
 
@@ -116,7 +115,7 @@ public class ContentServiceImpl implements ContentService {
             existingContent.setScriptMapping(content.getScriptMapping());
 
             contentRepository.save(existingContent);
-            logger.info("Successfully Updated Content for id :{}", existingContent.getId());
+            log.info("Successfully Updated Content for id :{}", existingContent.getId());
             return existingContent;
         } else {
             content.setContentTopic(content.getContentTopic());
@@ -131,7 +130,7 @@ public class ContentServiceImpl implements ContentService {
             content.setScriptMapping(content.getScriptMapping());
 
             contentRepository.save(content);
-            logger.info("Successfully Saved Content with id :{}", content.getId());
+            log.info("Successfully Saved Content with id :{}", content.getId());
             return content;
         }
     }
