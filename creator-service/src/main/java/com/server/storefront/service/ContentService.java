@@ -1,7 +1,7 @@
 package com.server.storefront.service;
 
-import com.server.storefront.creator.model.Content;
-import com.server.storefront.creator.model.ContentLite;
+import com.server.storefront.model.creator.Content;
+import com.server.storefront.model.creator.ContentLite;
 
 public interface ContentService {
 

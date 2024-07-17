@@ -7,7 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableCaching
-@ComponentScan(basePackages = "com.server.storefront")
 public class CreatorApplication {
 
     public static void main(String[] args) {

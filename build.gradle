@@ -24,7 +24,6 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-        implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'io.jsonwebtoken:jjwt:0.12.5'
         implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
@@ -38,9 +37,6 @@ subprojects {
 
         //lombok dependencies
         implementation 'org.projectlombok:lombok:1.18.28'
-
-        //javax dependencies
-        implementation 'javax.persistence:javax.persistence:2.0.3'
 
         //testImplementations
         testImplementation platform('org.junit:junit-bom:5.9.1')

@@ -1,11 +1,11 @@
 package com.server.storefront.service;
 
-import com.server.storefront.admin.model.Platform;
-import com.server.storefront.creator.model.*;
-import com.server.storefront.creator.repository.ContentRepository;
-import com.server.storefront.creator.repository.CreatorRepository;
-import com.server.storefront.admin.repository.PlatformRepository;
-import com.server.storefront.creator.repository.ScriptRepository;
+import com.server.storefront.model.admin.Platform;
+import com.server.storefront.model.creator.*;
+import com.server.storefront.repository.ContentRepository;
+import com.server.storefront.repository.CreatorRepository;
+import com.server.storefront.repository.PlatformRepository;
+import com.server.storefront.repository.ScriptRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +25,16 @@ public class ContentServiceImpl implements ContentService {
     private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
     @Autowired
-    ContentRepository contentRepository;
+    private ContentRepository contentRepository;
 
     @Autowired
-    CreatorRepository creatorRepository;
+    private CreatorRepository creatorRepository;
 
     @Autowired
-    PlatformRepository platformRepository;
+    private PlatformRepository platformRepository;
 
     @Autowired
-    ScriptRepository scriptRepository;
+    private ScriptRepository scriptRepository;
 
     @Override
     @Transactional

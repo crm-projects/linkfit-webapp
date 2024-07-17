@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.creator.model.Content;
-import com.server.storefront.creator.model.ContentLite;
+import com.server.storefront.model.creator.Content;
+import com.server.storefront.model.creator.ContentLite;
 import com.server.storefront.service.ContentService;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.exception.CreatorException;
@@ -11,13 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+
+@RestController
 @RequestMapping("/content")
 public class ContentServiceController {
 
@@ -26,7 +23,7 @@ public class ContentServiceController {
     private ContentService contentService;
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Content> saveContent(@RequestBody ContentLite contentLite, HttpServletRequest request)
+    public AbstractJsonResponse<Content> saveContent(@RequestBody ContentLite contentLite, HttpServletRequest request)
             throws ServletException, Exception {
         try {
             if (contentLite == null) {
@@ -39,7 +36,7 @@ public class ContentServiceController {
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Content> deleteContent(@RequestBody ContentLite contentLite, HttpServletRequest request)
+    public AbstractJsonResponse<Content> deleteContent(@RequestBody ContentLite contentLite, HttpServletRequest request)
             throws ServletException, Exception {
         try {
             if (contentLite == null) {

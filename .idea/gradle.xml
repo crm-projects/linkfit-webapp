@@ -11,8 +11,9 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/admin-service" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/creator-service" />
-            <option value="$PROJECT_DIR$/model-kit" />
+            <option value="$PROJECT_DIR$/seller-service" />
             <option value="$PROJECT_DIR$/utils" />
           </set>
         </option>

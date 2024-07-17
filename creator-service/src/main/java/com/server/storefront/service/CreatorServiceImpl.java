@@ -1,12 +1,12 @@
 package com.server.storefront.service;
 
-import com.server.storefront.admin.model.Plan;
-import com.server.storefront.creator.model.Creator;
-import com.server.storefront.creator.model.CreatorLite;
-import com.server.storefront.creator.model.CreatorPlanMapping;
-import com.server.storefront.enums.PlanControl;
-import com.server.storefront.creator.repository.CreatorRepository;
-import com.server.storefront.admin.repository.PlanRepository;
+import com.server.storefront.model.admin.Plan;
+import com.server.storefront.model.creator.Creator;
+import com.server.storefront.model.creator.CreatorLite;
+import com.server.storefront.model.creator.CreatorPlanMapping;
+import com.server.storefront.model.enums.PlanControl;
+import com.server.storefront.repository.CreatorRepository;
+import com.server.storefront.repository.PlanRepository;
 import com.server.storefront.utils.ApplicationConstants;
 import com.server.storefront.utils.EmailConstants;
 import com.server.storefront.utils.OTPGenerator;
@@ -14,16 +14,13 @@ import com.server.storefront.utils.Util;
 import com.server.storefront.utils.exception.CreatorException;
 import com.server.storefront.utils.exception.RandomGeneratorException;
 import com.server.storefront.utils.helper.EmailSender;
-import com.server.storefront.enums.EmailDomain;
+import com.server.storefront.model.enums.EmailDomain;
 import com.server.storefront.utils.holder.OTPHolder;
-import com.server.storefront.auth.SignIn;
-import com.server.storefront.auth.SignUp;
+import com.server.storefront.model.auth.SignIn;
+import com.server.storefront.model.auth.SignUp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -49,14 +46,6 @@ public class CreatorServiceImpl implements CreatorService {
     @Autowired
     EmailSender emailSender;
 
-    private final PasswordEncoder passwordEncoder;
-
-    private final AuthenticationManager authenticationManager;
-
-    public CreatorServiceImpl(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-    }
 
     @Override
     @Transactional
@@ -102,12 +91,6 @@ public class CreatorServiceImpl implements CreatorService {
     }
 
     private Optional<Creator> validateCreateSignIn(SignIn authObj) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authObj.getUserEmail(),
-                        authObj.getUserPassword()
-                )
-        );
         return creatorRepository.findCreatorByEmailAddress(authObj.getUserEmail());
     }
 
@@ -152,8 +135,7 @@ public class CreatorServiceImpl implements CreatorService {
     public Creator saveUpdateCreatorProfileSettings(Creator creator, boolean isExistingCreator) {
 
         if (isExistingCreator) {
-            Creator existingCreator = creatorRepository.findById(creator.getId()).get();
-            existingCreator.setUserName(creator.getUsername());
+            Creator existingCreator = creatorRepository.findById(creator.getId()).get();;
             existingCreator.setEmailAddress(creator.getEmailAddress());
             existingCreator.setGender(creator.getGender());
             existingCreator.setDateOfBirth(creator.getDateOfBirth());
@@ -166,7 +148,6 @@ public class CreatorServiceImpl implements CreatorService {
             logger.info("Successfully Updated Creator Profile Settings for id :{}", creator.getId());
             return existingCreator;
         } else {
-            creator.setUserName(creator.getUsername());
             creator.setEmailAddress(creator.getEmailAddress());
             creator.setGender(creator.getGender());
             creator.setDateOfBirth(creator.getDateOfBirth());

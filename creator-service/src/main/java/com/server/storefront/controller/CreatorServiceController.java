@@ -1,25 +1,22 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.creator.model.Creator;
-import com.server.storefront.creator.model.CreatorLite;
+import com.server.storefront.model.creator.Creator;
+import com.server.storefront.model.creator.CreatorLite;
 import com.server.storefront.service.CreatorService;
 import com.server.storefront.utils.Util;
 import com.server.storefront.utils.exception.CreatorException;
-import com.server.storefront.auth.SignIn;
+import com.server.storefront.model.auth.SignIn;
 import com.server.storefront.utils.json.AbstractJsonResponse;
-import com.server.storefront.auth.SignUp;
+import com.server.storefront.model.auth.SignUp;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+
+@RestController
 @RequestMapping("/creator")
 public class CreatorServiceController {
 
@@ -29,7 +26,7 @@ public class CreatorServiceController {
     CreatorService creatorService;
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<SignUp> authenticateCreator(@RequestBody SignUp authObj, HttpServletRequest request)
+    public AbstractJsonResponse<SignUp> creatorSignUp(@RequestBody SignUp authObj, HttpServletRequest request)
             throws CreatorException, ServletException, Exception {
         logger.info("Preparing Authentication for user: {}", authObj.getUserName());
         try {
@@ -44,7 +41,7 @@ public class CreatorServiceController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Creator> creatorLogin(@RequestBody SignIn authObj, HttpServletRequest request)
+    public AbstractJsonResponse<Creator> creatorLogin(@RequestBody SignIn authObj, HttpServletRequest request)
             throws CreatorException, ServletException, Exception {
         logger.info("Preparing Login for user: {}", authObj.getUserEmail());
         try {
@@ -59,7 +56,7 @@ public class CreatorServiceController {
     }
 
     @RequestMapping(value = "/saveCreatorProfileSettings", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Creator> saveCreatorProfileLiteSettings(@RequestBody CreatorLite creatorLite, HttpServletRequest request)
+    public AbstractJsonResponse<Creator> saveCreatorProfileLiteSettings(@RequestBody CreatorLite creatorLite, HttpServletRequest request)
             throws CreatorException, ServletException, Exception {
         try {
             if (creatorLite == null) {
@@ -72,7 +69,7 @@ public class CreatorServiceController {
     }
 
     @RequestMapping(value = "/deleteCreator", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Creator> deleteCreatorProfile(@RequestBody CreatorLite creatorLite, HttpServletRequest request)
+    public AbstractJsonResponse<Creator> deleteCreatorProfile(@RequestBody CreatorLite creatorLite, HttpServletRequest request)
             throws ServletException, Exception {
         try {
             if (creatorLite == null) {
@@ -83,7 +80,5 @@ public class CreatorServiceController {
             throw new CreatorException(ex.getMessage());
         }
     }
-
-
 
 }

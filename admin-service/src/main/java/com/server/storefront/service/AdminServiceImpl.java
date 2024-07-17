@@ -1,10 +1,10 @@
 package com.server.storefront.service;
 
 
-import com.server.storefront.admin.model.Plan;
-import com.server.storefront.admin.model.Platform;
-import com.server.storefront.admin.repository.PlanRepository;
-import com.server.storefront.admin.repository.PlatformRepository;
+import com.server.storefront.model.admin.Plan;
+import com.server.storefront.model.admin.Platform;
+import com.server.storefront.repository.PlanRepository;
+import com.server.storefront.repository.PlatformRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

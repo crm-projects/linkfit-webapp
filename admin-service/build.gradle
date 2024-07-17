@@ -3,5 +3,5 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     implementation project(path: ':utils')
-    implementation project(path: ':model-kit')
+    implementation project(path: ':core')
 }

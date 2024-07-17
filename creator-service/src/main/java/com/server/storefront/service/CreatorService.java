@@ -1,11 +1,11 @@
 package com.server.storefront.service;
 
-import com.server.storefront.creator.model.Creator;
-import com.server.storefront.creator.model.CreatorLite;
+import com.server.storefront.model.creator.Creator;
+import com.server.storefront.model.creator.CreatorLite;
 import com.server.storefront.utils.exception.CreatorException;
 import com.server.storefront.utils.exception.RandomGeneratorException;
-import com.server.storefront.auth.SignIn;
-import com.server.storefront.auth.SignUp;
+import com.server.storefront.model.auth.SignIn;
+import com.server.storefront.model.auth.SignUp;
 
 public interface CreatorService {
 
