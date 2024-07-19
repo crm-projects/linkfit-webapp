@@ -17,7 +17,7 @@ public class CreatorPlanMapping {
 
     @OneToOne
     @JoinColumn(name = "CREATOR_ID")
-    private Creator creator;
+    private CreatorProfile creatorProfile;
 
     @OneToOne
     @JoinColumn(name = "PLAN_ID")

@@ -23,7 +23,7 @@ public class CreatorSMMap {
 
     @OneToOne
     @JoinColumn(name = "CREATOR_ID")
-    private Creator creator;
+    private CreatorProfile creatorProfile;
 
     @ManyToOne
     @JoinColumn(name = "PLATFORM_ID")

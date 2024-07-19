@@ -23,11 +23,9 @@ public class CreatorSMMapLite {
     @JsonProperty("platformId")
     private String socialMediaId;
 
-    @Nonnull
     @JsonProperty("linkedInd")
     private boolean linkedInd;
 
-    @Nonnull
     @JsonProperty("activeInd")
     private boolean activeInd;
 }

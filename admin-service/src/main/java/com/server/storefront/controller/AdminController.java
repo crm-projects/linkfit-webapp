@@ -4,38 +4,35 @@ import com.server.storefront.model.admin.Plan;
 import com.server.storefront.model.admin.Platform;
 import com.server.storefront.service.AdminService;
 import com.server.storefront.utils.Util;
-import com.server.storefront.utils.json.AbstractJsonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@Controller
-@RequestMapping("/admin")
+@RestController
 public class AdminController {
 
 
     @Autowired
     AdminService adminService;
 
-    @RequestMapping(value = "/plan/save", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Boolean> savePlanDetails(@RequestBody Plan plan, HttpServletRequest request) {
+    @PostMapping("/api/plan/save")
+    public ResponseEntity<Boolean> savePlanDetails(@RequestBody Plan plan, HttpServletRequest request) {
         try {
-            return Util.getJsonResponse(request, adminService.savePlanDetails(plan));
+            return new ResponseEntity<>(adminService.savePlanDetails(plan), HttpStatus.OK);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    @RequestMapping(value = "/platform/save", method = RequestMethod.POST)
-    public @ResponseBody AbstractJsonResponse<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {
+
+    @PostMapping("/api/platform/save")
+    public ResponseEntity<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {
         try {
-            return Util.getJsonResponse(request, adminService.savePlatformItems(platform));
+            return new ResponseEntity<>(adminService.savePlatformItems(platform), HttpStatus.OK);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
