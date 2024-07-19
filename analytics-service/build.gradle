@@ -1,9 +1,0 @@
-group = 'com.server.storefront'
-version = '1.0-SNAPSHOT'
-
-dependencies {
-}
-
-test {
-    useJUnitPlatform()
-}
