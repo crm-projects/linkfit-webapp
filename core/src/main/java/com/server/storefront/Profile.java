@@ -22,9 +22,14 @@ public abstract class Profile {
     @Column(name = "EMAIL_ADDRESS")
     private String emailAddress;
 
+    @Column(name = "PASSWORD")
+    private String password;
+
+    @Nullable
     @Column(name = "DISPLAY_NAME")
     private String displayName;
 
+    @Nullable
     @Column(name = "GENDER")
     private String gender;
 

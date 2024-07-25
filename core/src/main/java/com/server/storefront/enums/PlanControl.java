@@ -2,7 +2,7 @@ package com.server.storefront.enums;
 
 public enum PlanControl {
 
-    BASE_PLAN(7);
+    BASE_PLAN(30);
 
     private int expiryDate;
 
