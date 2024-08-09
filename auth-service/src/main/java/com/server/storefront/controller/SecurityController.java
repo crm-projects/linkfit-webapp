@@ -1,8 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.auth.model.User;
-import com.server.storefront.auth.model.UserRegistration;
-import com.server.storefront.repository.TestRepository;
+import com.server.storefront.model.User;
+import com.server.storefront.model.UserRegistration;
 import com.server.storefront.service.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,15 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RequestMapping(value = "/v1")
+@RequestMapping(value = "/api/v1")
 @RestController
 public class SecurityController {
 
     @Autowired
     private SecurityService securityService;
-
-    @Autowired
-    TestRepository testRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> userRegistration(@RequestBody UserRegistration user, HttpServletRequest request) {

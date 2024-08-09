@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.admin.model.Plan;
-import com.server.storefront.admin.model.Platform;
+import com.server.storefront.model.Plan;
+import com.server.storefront.model.Platform;
 import com.server.storefront.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

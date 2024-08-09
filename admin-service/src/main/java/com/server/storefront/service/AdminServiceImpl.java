@@ -1,10 +1,10 @@
 package com.server.storefront.service;
 
 
-import com.server.storefront.admin.model.Plan;
-import com.server.storefront.admin.model.Platform;
-import com.server.storefront.plan.repository.PlanRepository;
-import com.server.storefront.plan.repository.PlatformRepository;
+import com.server.storefront.model.Plan;
+import com.server.storefront.model.Platform;
+import com.server.storefront.repository.PlanRepository;
+import com.server.storefront.repository.PlatformRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

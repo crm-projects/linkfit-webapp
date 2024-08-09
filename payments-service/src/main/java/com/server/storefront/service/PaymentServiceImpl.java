@@ -1,15 +1,16 @@
 package com.server.storefront.service;
 
-import com.server.storefront.Profile;
-import com.server.storefront.auth.model.UserBankDetails;
-import com.server.storefront.creator.model.CreatorProfile;
-import com.server.storefront.repository.CreatorRepository;
-import com.server.storefront.utils.ApplicationConstants;
+
+import com.server.storefront.commons.model.UserBankDetails;
+import com.server.storefront.commons.model.CreatorProfile;
+import com.server.storefront.commons.repository.CreatorRepository;
+import com.server.storefront.commons.constants.ApplicationConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -24,15 +25,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public UserBankDetails getUserPaymentDetails(UserBankDetails userBankDetails, String userId, HttpServletRequest request) {
         try {
-            Profile userProfile = (Profile) request.getAttribute(ApplicationConstants.USER_PROFILE);
             String type = request.getHeader(ApplicationConstants.STOREFRONT_USER);
-            if (type.equalsIgnoreCase(ApplicationConstants.CREATOR_PROFILE)) {
-               CreatorProfile creatorProfile = creatorRepository.findById(userId).orElse(null);
-               if (Objects.nonNull(creatorProfile)) {
-                   validateBankAccountNumber(userBankDetails.getAccountNumber());
-                   validateBankIFSCCode(userBankDetails.getBankIFSCCode());
-                   validateUserPANDetails(userBankDetails.getPermanentAccountNumber());
-               }
+            if (validateBankAccountNumber(userBankDetails.getAccountNumber()) &&
+                    validateBankIFSCCode(userBankDetails.getBankIFSCCode()) &&
+                    validateUserPANDetails(userBankDetails.getPermanentAccountNumber())) {
+                saveUserPaymentDetails(userBankDetails, type, userId);
             }
             return new UserBankDetails();
         } catch (Exception ex) {
@@ -40,28 +37,40 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private void validateUserPANDetails(String permanentAccountNumber) {
-        try {
-
-        } catch (Exception ex) {
+    private boolean validateUserPANDetails(String permanentAccountNumber) {
+        if (!StringUtils.hasText(permanentAccountNumber)) {
             log.error("");
         }
+        return permanentAccountNumber.matches(ApplicationConstants.PAN_VALIDATION);
     }
 
-    private void validateBankIFSCCode(String bankIFSCCode) {
-        try {
-
-        } catch (Exception ex) {
+    private boolean validateBankIFSCCode(String bankIFSCCode) {
+        if (!StringUtils.hasText(bankIFSCCode)) {
             log.error("");
         }
+        return bankIFSCCode.matches(ApplicationConstants.IFSC_VALIDATION);
     }
 
-    private void validateBankAccountNumber(String accountNumber) {
-        try {
-
-        } catch (Exception ex) {
+    private boolean validateBankAccountNumber(String accountNumber) {
+        if (!StringUtils.hasText(accountNumber)) {
             log.error("");
         }
 
+        return accountNumber.matches(ApplicationConstants.ACCOUNT_NUMBER_VALIDATION);
+    }
+
+    private void saveUserPaymentDetails(UserBankDetails userBankDetails, String type, String userId) {
+
+        switch (type.toUpperCase()) {
+            case ApplicationConstants.CREATOR_PROFILE -> {
+                CreatorProfile creatorProfile = creatorRepository.findById(userId).orElse(null);
+                if (Objects.nonNull(creatorProfile)) {
+                    creatorProfile.setCreatorBankDetails(userBankDetails);
+                    creatorRepository.save(creatorProfile);
+                }
+
+            }
+            default -> { }
+        }
     }
 }

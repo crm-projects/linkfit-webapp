@@ -2,8 +2,7 @@ group = 'com.server.storefront'
 version = '1.0-SNAPSHOT'
 
 dependencies {
-    implementation project(path: ':utils')
-    implementation project(path: ':core')
+    implementation project(path: ':core-commons')
     implementation project(path: ':admin-service')
     implementation project(path: ':auth-service')
     implementation project(path: ':payments-service')

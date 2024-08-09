@@ -1,19 +1,14 @@
 package com.server.storefront.service;
 
-import com.server.storefront.Profile;
-import com.server.storefront.admin.model.Plan;
-import com.server.storefront.auth.model.User;
-import com.server.storefront.auth.model.UserRegistration;
-import com.server.storefront.creator.model.CreatorProfile;
-import com.server.storefront.creator.model.SellerPlanMapping;
-import com.server.storefront.enums.PlanControl;
-import com.server.storefront.plan.repository.PlanRepository;
-import com.server.storefront.repository.CreatorRepository;
-import com.server.storefront.seller.SellerProfile;
-import com.server.storefront.seller.repository.SellerRepository;
-import com.server.storefront.utils.ApplicationConstants;
+
+import com.server.storefront.model.User;
+import com.server.storefront.model.UserRegistration;
 import com.server.storefront.utils.PasswordUtil;
-import com.server.storefront.utils.Util;
+import com.server.storefront.commons.repository.CreatorRepository;
+import com.server.storefront.commons.model.CreatorProfile;
+import com.server.storefront.commons.model.Profile;
+import com.server.storefront.commons.constants.ApplicationConstants;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +22,7 @@ import java.util.Objects;
 public class SecurityServiceImpl implements SecurityService {
 
     @Autowired
-    private PlanRepository planRepository;
-
-    @Autowired
     private CreatorRepository creatorRepository;
-
-    @Autowired
-    private SellerRepository sellerRepository;
 
     @Override
     @Transactional
@@ -75,20 +64,7 @@ public class SecurityServiceImpl implements SecurityService {
 
     private void validatePlanAndRegisterUser(Profile userProfile, String type) {
         try {
-            if (type.equalsIgnoreCase(ApplicationConstants.SELLER_PROFILE)) {
-                SellerProfile sellerProfile = (SellerProfile) userProfile;
-                Plan plan = planRepository.getPlanByName(ApplicationConstants.BASE_PLAN);
-                if (Objects.nonNull(plan)) {
-                    SellerPlanMapping planMapping = new SellerPlanMapping();
-                    planMapping.setPlan(plan);
-                    planMapping.setFreeTrial(true);
-                    planMapping.setActiveInd(true);
-                    planMapping.setExpiresOn(Util.getExpiryPeriod(PlanControl.BASE_PLAN.getExpiryDate()));
-                    planMapping.setSellerProfile((SellerProfile) userProfile);
-                    sellerProfile.setSellerPlanMapping(planMapping);
-                }
-                sellerRepository.save(sellerProfile);
-            } else {
+            if (type.equalsIgnoreCase(ApplicationConstants.CREATOR_PROFILE)) {
                 creatorRepository.save((CreatorProfile) userProfile);
             }
         } catch (Exception ex) {
