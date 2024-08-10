@@ -12,20 +12,6 @@
     <groupId>com.server.storefront</groupId>
     <artifactId>admin-service</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.server.storefront</groupId>
-            <artifactId>core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.server.storefront</groupId>
-            <artifactId>utils</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

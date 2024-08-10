@@ -1,8 +1,8 @@
 package com.server.storefront.service;
 
 
-import com.server.storefront.model.admin.Plan;
-import com.server.storefront.model.admin.Platform;
+import com.server.storefront.model.Plan;
+import com.server.storefront.model.Platform;
 
 public interface AdminService {
 

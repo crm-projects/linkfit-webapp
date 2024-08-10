@@ -5,12 +5,13 @@
     <file url="file://$PROJECT_DIR$/analytics-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/auth-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/core-app/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/core-commons/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/core-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/partner-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payments-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/product-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/store-service/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/utils/src/main/java" charset="UTF-8" />
   </component>
 </project>
