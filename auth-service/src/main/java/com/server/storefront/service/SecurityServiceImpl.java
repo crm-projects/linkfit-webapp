@@ -1,8 +1,8 @@
 package com.server.storefront.service;
 
 
-import com.server.storefront.model.User;
-import com.server.storefront.model.UserRegistration;
+import com.server.storefront.dto.User;
+import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.utils.PasswordUtil;
 import com.server.storefront.commons.repository.CreatorRepository;
 import com.server.storefront.commons.model.CreatorProfile;

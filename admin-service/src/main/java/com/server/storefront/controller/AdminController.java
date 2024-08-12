@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
+@RequestMapping("/admin/api/v1")
 @RestController
 public class AdminController {
 
@@ -18,7 +19,7 @@ public class AdminController {
     @Autowired
     AdminService adminService;
 
-    @PostMapping("/api/plan/save")
+    @PostMapping("/plan/save")
     public ResponseEntity<Boolean> savePlanDetails(@RequestBody Plan plan, HttpServletRequest request) {
         try {
             return new ResponseEntity<>(adminService.savePlanDetails(plan), HttpStatus.OK);
@@ -28,7 +29,7 @@ public class AdminController {
     }
 
 
-    @PostMapping("/api/platform/save")
+    @PostMapping("/platform/save")
     public ResponseEntity<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {
         try {
             return new ResponseEntity<>(adminService.savePlatformItems(platform), HttpStatus.OK);

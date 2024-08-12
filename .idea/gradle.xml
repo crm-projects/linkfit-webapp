@@ -15,8 +15,9 @@
             <option value="$PROJECT_DIR$/auth-service" />
             <option value="$PROJECT_DIR$/core-app" />
             <option value="$PROJECT_DIR$/core-commons" />
+            <option value="$PROJECT_DIR$/partner-service" />
             <option value="$PROJECT_DIR$/payments-service" />
-            <option value="$PROJECT_DIR$/store-service" />
+            <option value="$PROJECT_DIR$/product-service" />
           </set>
         </option>
       </GradleProjectSettings>

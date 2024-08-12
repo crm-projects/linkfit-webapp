@@ -6,7 +6,7 @@ dependencies {
     implementation project(path: ':admin-service')
     implementation project(path: ':auth-service')
     implementation project(path: ':payments-service')
-    implementation project(path: ':store-service')
+    implementation project(path: ':product-service')
     implementation project(path: ':analytics-service')
 }
 

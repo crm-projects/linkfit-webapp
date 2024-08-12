@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.model.User;
-import com.server.storefront.model.UserRegistration;
+import com.server.storefront.dto.User;
+import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.service.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
