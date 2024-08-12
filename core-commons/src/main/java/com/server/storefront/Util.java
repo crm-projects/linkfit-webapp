@@ -1,13 +1,11 @@
-package com.server.storefront.commons;
+package com.server.storefront;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.storefront.commons.constants.ApplicationConstants;
-import com.server.storefront.commons.model.Profile;
-import com.server.storefront.commons.model.CreatorProfile;
+import com.server.storefront.constants.ApplicationConstants;
+import com.server.storefront.model.Profile;
+import com.server.storefront.model.CreatorProfile;
 import lombok.SneakyThrows;
 import org.springframework.util.StringUtils;
-
-import java.time.LocalDateTime;
 
 public class Util {
 
@@ -26,7 +24,7 @@ public class Util {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(object);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -36,7 +34,7 @@ public class Util {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(jsonString, clazz);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

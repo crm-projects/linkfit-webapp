@@ -1,9 +1,9 @@
 package com.server.storefront.service;
 
-import com.server.storefront.commons.Util;
-import com.server.storefront.commons.model.Campaign;
-import com.server.storefront.commons.model.Partner;
-import com.server.storefront.commons.repository.PartnerRepository;
+import com.server.storefront.Util;
+import com.server.storefront.model.Campaign;
+import com.server.storefront.model.Partner;
+import com.server.storefront.repository.PartnerRepository;
 import com.server.storefront.dto.CampaignDTO;
 import com.server.storefront.dto.CreatorCriteriaDTO;
 import com.server.storefront.dto.PartnerDTO;

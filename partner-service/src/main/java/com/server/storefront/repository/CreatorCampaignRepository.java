@@ -1,6 +1,6 @@
 package com.server.storefront.repository;
 
-import com.server.storefront.commons.model.Campaign;
+import com.server.storefront.model.Campaign;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
-package com.server.storefront.commons.helper;
+package com.server.storefront.helper;
 
-import com.server.storefront.commons.exception.RandomGeneratorException;
+import com.server.storefront.exception.RandomGeneratorException;
 
 import java.security.SecureRandom;
 

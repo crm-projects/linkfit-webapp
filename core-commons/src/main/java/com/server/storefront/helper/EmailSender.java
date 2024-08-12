@@ -1,4 +1,4 @@
-package com.server.storefront.commons.helper;
+package com.server.storefront.helper;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;

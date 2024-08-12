@@ -1,6 +1,6 @@
 package com.server.storefront.service;
 
-import com.server.storefront.commons.model.UserBankDetails;
+import com.server.storefront.model.UserBankDetails;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface PaymentService {

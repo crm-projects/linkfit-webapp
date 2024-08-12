@@ -1,4 +1,4 @@
-package com.server.storefront.commons.model;
+package com.server.storefront.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -34,7 +34,7 @@ public class UserBankDetails {
     @OneToOne
     @MapsId
     @JoinColumn(name = "CREATOR_ID")
-    private Profile userProfile;
+    private CreatorProfile userProfile;
 
 }
 

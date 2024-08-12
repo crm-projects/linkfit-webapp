@@ -1,6 +1,6 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.commons.model.UserBankDetails;
+import com.server.storefront.model.UserBankDetails;
 import com.server.storefront.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

@@ -1,12 +1,9 @@
 package com.server.storefront.service;
 
-import com.server.storefront.commons.model.Campaign;
-import com.server.storefront.commons.model.Partner;
 import com.server.storefront.dto.CampaignDTO;
 import com.server.storefront.dto.PartnerDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PartnerService {
 

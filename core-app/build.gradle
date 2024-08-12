@@ -1,6 +1,3 @@
-group = 'com.server.storefront'
-version = '1.0-SNAPSHOT'
-
 dependencies {
     implementation project(path: ':core-commons')
     implementation project(path: ':admin-service')
@@ -8,8 +5,9 @@ dependencies {
     implementation project(path: ':payments-service')
     implementation project(path: ':product-service')
     implementation project(path: ':analytics-service')
+    implementation project(path: ':partner-service')
 }
 
-test {
-    useJUnitPlatform()
+springBoot {
+    mainClass.set('com.server.storefront.StorefrontApplication')
 }

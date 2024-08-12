@@ -1,10 +1,10 @@
 rootProject.name = 'server-local'
+include 'core-app'
 include 'admin-service'
 include 'core-commons'
 include 'product-service'
 include 'payments-service'
 include 'analytics-service'
 include 'auth-service'
-include 'core-app'
 include 'partner-service'
 

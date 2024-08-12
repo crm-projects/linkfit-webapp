@@ -1,4 +1,4 @@
-package com.server.storefront.commons.constants;
+package com.server.storefront.constants;
 
 public class ApplicationConstants {
 

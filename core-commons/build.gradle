@@ -1,2 +1,6 @@
-group = 'com.server.storefront'
-version = '1.0-SNAPSHOT'
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
+// Disable bootJar if this module is not a standalone Spring Boot application
+tasks.withType(BootJar).configureEach {
+    enabled = false
+}

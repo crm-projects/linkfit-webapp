@@ -1,4 +1,4 @@
-package com.server.storefront.commons.holder;
+package com.server.storefront.holder;
 
 import lombok.Data;
 import org.springframework.cache.annotation.CachePut;

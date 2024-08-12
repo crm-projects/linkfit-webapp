@@ -1,10 +1,10 @@
 package com.server.storefront.service;
 
 
-import com.server.storefront.commons.model.UserBankDetails;
-import com.server.storefront.commons.model.CreatorProfile;
-import com.server.storefront.commons.repository.CreatorRepository;
-import com.server.storefront.commons.constants.ApplicationConstants;
+import com.server.storefront.model.UserBankDetails;
+import com.server.storefront.model.CreatorProfile;
+import com.server.storefront.repository.CreatorRepository;
+import com.server.storefront.constants.ApplicationConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

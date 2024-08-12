@@ -1,8 +1,8 @@
-package com.server.storefront.commons.interceptors;
+package com.server.storefront.interceptors;
 
-import com.server.storefront.commons.model.Profile;
-import com.server.storefront.commons.constants.ApplicationConstants;
-import com.server.storefront.commons.Util;
+import com.server.storefront.model.Profile;
+import com.server.storefront.constants.ApplicationConstants;
+import com.server.storefront.Util;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

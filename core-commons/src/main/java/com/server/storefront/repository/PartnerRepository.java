@@ -1,6 +1,6 @@
-package com.server.storefront.commons.repository;
+package com.server.storefront.repository;
 
-import com.server.storefront.commons.model.Partner;
+import com.server.storefront.model.Partner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

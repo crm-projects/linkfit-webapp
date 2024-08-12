@@ -4,10 +4,10 @@ package com.server.storefront.service;
 import com.server.storefront.dto.User;
 import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.utils.PasswordUtil;
-import com.server.storefront.commons.repository.CreatorRepository;
-import com.server.storefront.commons.model.CreatorProfile;
-import com.server.storefront.commons.model.Profile;
-import com.server.storefront.commons.constants.ApplicationConstants;
+import com.server.storefront.repository.CreatorRepository;
+import com.server.storefront.model.CreatorProfile;
+import com.server.storefront.model.Profile;
+import com.server.storefront.constants.ApplicationConstants;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

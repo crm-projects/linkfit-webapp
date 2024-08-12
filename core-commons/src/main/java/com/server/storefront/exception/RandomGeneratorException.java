@@ -1,4 +1,4 @@
-package com.server.storefront.commons.exception;
+package com.server.storefront.exception;
 
 public class RandomGeneratorException extends Exception{
 

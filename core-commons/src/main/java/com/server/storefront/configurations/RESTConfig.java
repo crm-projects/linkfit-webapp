@@ -1,6 +1,6 @@
-package com.server.storefront.commons.configurations;
+package com.server.storefront.configurations;
 
-import com.server.storefront.commons.interceptors.RESTValidationInterceptor;
+import com.server.storefront.interceptors.RESTValidationInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

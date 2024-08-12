@@ -1,4 +1,4 @@
-package com.server.storefront.commons.model;
+package com.server.storefront.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
