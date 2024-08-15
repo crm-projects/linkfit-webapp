@@ -1,12 +1,12 @@
 package com.server.storefront.service;
 
-import com.server.storefront.model.User;
-import com.server.storefront.model.UserRegistration;
+import com.server.storefront.dto.User;
+import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.utils.PasswordUtil;
-import com.server.storefront.utils.constants.ApplicationConstants;
-import com.server.storefront.utils.model.CreatorProfile;
-import com.server.storefront.utils.model.Profile;
-import com.server.storefront.utils.repository.CreatorRepository;
+import com.server.storefront.constants.ApplicationConstants;
+import com.server.storefront.model.CreatorProfile;
+import com.server.storefront.model.Profile;
+import com.server.storefront.repository.CreatorRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

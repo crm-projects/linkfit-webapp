@@ -1,7 +1,7 @@
 package com.server.storefront.controller;
 
 import com.server.storefront.service.PaymentService;
-import com.server.storefront.utils.model.UserBankDetails;
+import com.server.storefront.model.UserBankDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

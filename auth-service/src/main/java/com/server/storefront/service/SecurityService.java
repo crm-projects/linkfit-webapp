@@ -1,7 +1,7 @@
 package com.server.storefront.service;
 
-import com.server.storefront.model.User;
-import com.server.storefront.model.UserRegistration;
+import com.server.storefront.dto.User;
+import com.server.storefront.dto.UserRegistration;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface SecurityService {
