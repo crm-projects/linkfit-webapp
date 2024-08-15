@@ -1,6 +1,8 @@
 package com.server.storefront.service;
 
 
+import com.server.storefront.dto.PartnerDTO;
+import com.server.storefront.model.Partner;
 import com.server.storefront.model.Plan;
 import com.server.storefront.model.Platform;
 import com.server.storefront.repository.PlanRepository;
@@ -40,5 +42,15 @@ public class AdminServiceImpl implements AdminService {
         } catch (Exception ex ) {
             throw  new RuntimeException(ex.getMessage());
         }
+    }
+
+    @Override
+    public Partner savePartnerItems(PartnerDTO partnerDTO) {
+        try {
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return null;
     }
 }

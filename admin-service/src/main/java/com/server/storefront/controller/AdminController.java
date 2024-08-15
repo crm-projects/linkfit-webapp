@@ -1,5 +1,7 @@
 package com.server.storefront.controller;
 
+import com.server.storefront.dto.PartnerDTO;
+import com.server.storefront.model.Partner;
 import com.server.storefront.model.Plan;
 import com.server.storefront.model.Platform;
 import com.server.storefront.service.AdminService;
@@ -36,5 +38,14 @@ public class AdminController {
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
+    }
+
+    @PostMapping(value = "/partner/save")
+    public ResponseEntity<Partner> savePartnerItems(@RequestBody PartnerDTO partnerDTO, HttpServletRequest request) {
+         try {
+            return new ResponseEntity<>(adminService.savePartnerItems(partnerDTO), HttpStatus.OK);
+         } catch (Exception ex) {
+             throw new RuntimeException(ex.getMessage());
+         }
     }
 }
