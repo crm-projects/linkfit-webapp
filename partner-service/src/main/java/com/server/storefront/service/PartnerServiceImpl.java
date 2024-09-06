@@ -1,6 +1,9 @@
 package com.server.storefront.service;
 
 import com.server.storefront.Util;
+import com.server.storefront.constants.PartnerConstants;
+import com.server.storefront.exception.CampaignException;
+import com.server.storefront.exception.PartnerException;
 import com.server.storefront.model.Campaign;
 import com.server.storefront.model.Partner;
 import com.server.storefront.repository.PartnerRepository;
@@ -8,78 +11,85 @@ import com.server.storefront.dto.CampaignDTO;
 import com.server.storefront.dto.CreatorCriteriaDTO;
 import com.server.storefront.dto.PartnerDTO;
 import com.server.storefront.repository.CreatorCampaignRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PartnerServiceImpl implements PartnerService {
 
-    @Autowired
-    private PartnerRepository partnerRepository;
+    private final PartnerRepository partnerRepository;
 
-    @Autowired
-    private CreatorCampaignRepository campaignRepository;
+    private final CreatorCampaignRepository campaignRepository;
 
     @Override
-    @Cacheable
     @Transactional(readOnly = true)
-    public List<PartnerDTO> getAllPartnerDetails() {
-        List<PartnerDTO> partnerList = new ArrayList<>();
-        log.info("Fetching Partners List from the Database");
+    public Map<String, Object> getAllPartnerDetails(int page, int limit) throws PartnerException {
+        boolean hasNext;
         try {
-            List<Partner> partners = partnerRepository.findAllByActiveInd(true);
-            scrubPartnerItems(partners, partnerList);
+            log.info("Fetching Partners List from the Database");
+            PageRequest pageRequest = PageRequest.of(page, limit);
+            Page<Partner> partners = partnerRepository.findAllByActiveInd(true, pageRequest);
+            hasNext = (partners.getTotalPages() - 1) - page > 0;
+            if (partners.isEmpty()) {
+                throw new PartnerException(PartnerConstants.NO_INFO);
+            }
+            return scrubPartnerItems(partners, page, hasNext);
         } catch (Exception ex) {
             log.error(ex.getMessage());
+            throw new PartnerException("");
         }
-        return partnerList;
     }
 
     @Override
     @Transactional
-    public CampaignDTO launchCampaign(CampaignDTO campaignDTO) {
-        if (Objects.isNull(campaignDTO)) {
-            return null;
-        }
+    public CampaignDTO launchCampaign(CampaignDTO campaignDTO) throws CampaignException {
         try {
-            if (StringUtils.hasText(campaignDTO.getPartnerId())) {
+            if (Objects.isNull(campaignDTO)) {
+                log.error("Null Object encountered");
+                throw new CampaignException("Null Object encountered");
+            }
+
+            if (StringUtils.hasLength(campaignDTO.getPartnerId())) {
                 Partner partner = partnerRepository.findById(campaignDTO.getPartnerId()).orElse(null);
                 if (Objects.nonNull(partner)) {
-                    processCreatorCampaignItems(campaignDTO, partner);
-                    return campaignDTO;
+                    return processCreatorCampaignItems(campaignDTO, partner);
                 } else {
                     log.error("");
+                    throw new PartnerException("");
                 }
             }
         } catch (Exception ex) {
             log.error(ex.getMessage());
+            throw new CampaignException(ex.getMessage());
         }
         return null;
     }
 
-    private void processCreatorCampaignItems(CampaignDTO campaignDTO, Partner partner) {
-        Date now = new Date();
+    private CampaignDTO processCreatorCampaignItems(CampaignDTO campaignDTO, Partner partner) {
         Campaign campaign = new Campaign();
         if (StringUtils.hasLength(campaignDTO.getId())) {
             campaign = campaignRepository.findById(campaignDTO.getId()).orElse(null);
             if (Objects.nonNull(campaign)) {
                 createUpdateCampaignItems(campaign, campaignDTO, partner);
+                return campaignDTO;
             }
         } else {
-            campaign.setStartDate(now);
+            campaign.setStartDate(new Date());
             createUpdateCampaignItems(campaign, campaignDTO, partner);
+            return campaignDTO;
         }
+        return null;
     }
 
     private void createUpdateCampaignItems(Campaign campaign, CampaignDTO campaignDTO, Partner partner) {
@@ -97,22 +107,19 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     private void updatePartnerItems(Campaign campaign, Partner partner) {
-        List<Campaign> campaignList = new ArrayList<>();
-        campaignList.add(campaign);
-        if (partner.getCampaignList().isEmpty()) {
-            partner.setCampaignList(campaignList);
+        if (CollectionUtils.isEmpty(partner.getCampaignList())) {
+            partner.setCampaignList(Collections.singletonList(campaign));
         } else {
-            campaignList.addAll(partner.getCampaignList());
-            partner.setCampaignList(campaignList);
+            partner.getCampaignList().add(campaign);
         }
         partnerRepository.save(partner);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignDTO getCampaignById(String campaignId) {
+    public CampaignDTO getCampaignById(String campaignId) throws CampaignException {
         if (!StringUtils.hasLength(campaignId)) {
-            throw new RuntimeException("");
+            throw new CampaignException("");
         }
         Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
         if (Objects.nonNull(campaign)) {
@@ -128,18 +135,18 @@ public class PartnerServiceImpl implements PartnerService {
             return campaignDTO;
         } else {
             log.error("");
-            throw new RuntimeException("");
+            throw new CampaignException("");
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CampaignDTO> getAllCampaignByPartnerId(String partnerId) {
+    public List<CampaignDTO> getAllCampaignByPartnerId(String partnerId) throws PartnerException, CampaignException {
         if (!StringUtils.hasLength(partnerId)) {
-            throw new RuntimeException("");
+            throw new PartnerException("");
         }
-        List<CampaignDTO> campaignList = new ArrayList<>();
         try {
+            List<CampaignDTO> campaignList = new ArrayList<>();
             Partner partner = partnerRepository.findById(partnerId).orElse(null);
             if (Objects.nonNull(partner)) {
                 List<Campaign> campaigns = partner.getCampaignList();
@@ -157,37 +164,50 @@ public class PartnerServiceImpl implements PartnerService {
                     }
                 }
                 return campaignList;
+            } else {
+                log.error("");
+                throw new PartnerException("");
             }
         } catch (Exception ex) {
             log.error(ex.getMessage());
+            throw new CampaignException(ex.getMessage());
         }
-        return campaignList;
     }
 
     @Override
     @Transactional
-    public boolean deleteCampaignById(String campaignId) {
+    public boolean deleteCampaignById(String campaignId) throws CampaignException {
         if (!StringUtils.hasLength(campaignId)) {
-            throw new RuntimeException("");
+            throw new CampaignException("");
         }
         Campaign existingCampaign = campaignRepository.findById(campaignId).orElse(null);
         if (Objects.nonNull(existingCampaign)) {
             existingCampaign.setActiveInd(false);
             campaignRepository.save(existingCampaign);
             return true;
+        } else {
+            throw new CampaignException("");
         }
-        return false;
     }
 
-    private void scrubPartnerItems(List<Partner> partners, List<PartnerDTO> partnerList) {
-        if (!CollectionUtils.isEmpty(partners)) {
-            for (Partner partner : partners) {
-                PartnerDTO partnerDTO = new PartnerDTO();
-                partnerDTO.setName(partner.getName());
-                partnerDTO.setDomain(partner.getDomain());
-                partnerDTO.setAffiliateValue(partner.getAffiliatePercentage());
-                partnerList.add(partnerDTO);
-            }
+    private Map<String, Object> scrubPartnerItems(Page<Partner> partners, int page, boolean hasNext) {
+        List<PartnerDTO> partnerList = new ArrayList<>();
+        for (Partner partner : partners) {
+            PartnerDTO partnerDTO = new PartnerDTO();
+            partnerDTO.setName(partner.getName());
+            partnerDTO.setDomain(partner.getDomain());
+            partnerDTO.setAffiliateValue(partner.getAffiliatePercentage());
+            partnerList.add(partnerDTO);
         }
+
+        Map<String, Object> pageObject = new HashMap<>();
+        pageObject.put("current_page", page);
+        pageObject.put("has_next", hasNext);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("partners", partnerList);
+        result.put("paging", pageObject);
+
+        return result;
     }
 }
