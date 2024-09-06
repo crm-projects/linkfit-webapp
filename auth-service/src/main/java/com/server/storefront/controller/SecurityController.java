@@ -4,6 +4,7 @@ import com.server.storefront.dto.User;
 import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.service.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RequestMapping(value = "/api/v1")
+@RequestMapping(value = "/v1")
 @RestController
 public class SecurityController {
 
@@ -22,18 +23,18 @@ public class SecurityController {
     private SecurityService securityService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> userRegistration(@RequestBody UserRegistration user, HttpServletRequest request) {
+    public ResponseEntity<String> userRegistration(@RequestBody @NonNull UserRegistration user, HttpServletRequest request) {
         log.info("Preparing Registration for user: {}", user.getUserName());
         try {
-            return new ResponseEntity<>(securityService.validateAndRegisterUser(user,request), HttpStatus.OK);
-        } catch ( Exception ex) {
+            return new ResponseEntity<>(securityService.validateAndRegisterUser(user, request), HttpStatus.OK);
+        } catch (Exception ex) {
             log.error("Error: {} while authenticating User: {}", ex.getMessage(), user.getUserName());
             throw new RuntimeException(ex.getMessage());
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> userLogin(@RequestBody User user, HttpServletRequest request) {
+    public ResponseEntity<User> userLogin(@RequestBody @NonNull User user, HttpServletRequest request) {
         try {
             return new ResponseEntity<>(securityService.validateAndLoginUser(user), HttpStatus.OK);
         } catch (Exception ex) {

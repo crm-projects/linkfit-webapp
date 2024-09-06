@@ -8,15 +8,13 @@ import jakarta.persistence.Table;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.CascadeType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "CREATOR")
 @NoArgsConstructor

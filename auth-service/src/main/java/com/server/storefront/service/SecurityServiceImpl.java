@@ -29,6 +29,7 @@ public class SecurityServiceImpl implements SecurityService {
     public String validateAndRegisterUser(UserRegistration user, HttpServletRequest request) {
         if (Objects.isNull(user)) {
             log.error("");
+            throw new RuntimeException("");
         }
         String userType = request.getHeader(ApplicationConstants.STOREFRONT_USER);
         Profile userProfile = (Profile) request.getAttribute(ApplicationConstants.USER_PROFILE);
@@ -54,21 +55,11 @@ public class SecurityServiceImpl implements SecurityService {
             userProfile.setUserName(user.getUserName());
             userProfile.setEmailAddress(user.getUserEmail());
             userProfile.setPassword(PasswordUtil.encryptPassword(user.getUserPassword()));
-            validatePlanAndRegisterUser(userProfile, type);
+            creatorRepository.save((CreatorProfile) userProfile);
             return userProfile.getId();
         } catch (Exception ex) {
             log.error("");
             throw new RuntimeException();
-        }
-    }
-
-    private void validatePlanAndRegisterUser(Profile userProfile, String type) {
-        try {
-            if (type.equalsIgnoreCase(ApplicationConstants.CREATOR_PROFILE)) {
-                creatorRepository.save((CreatorProfile) userProfile);
-            }
-        } catch (Exception ex) {
-            log.error("");
         }
     }
 }

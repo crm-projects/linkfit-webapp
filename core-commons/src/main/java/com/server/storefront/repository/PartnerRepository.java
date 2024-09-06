@@ -10,4 +10,6 @@ import java.util.List;
 public interface PartnerRepository extends JpaRepository<Partner, String> {
 
     List<Partner> findAllByActiveInd(boolean activeInd);
+
+    boolean existsByName(String name);
 }
