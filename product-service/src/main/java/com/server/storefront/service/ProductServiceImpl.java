@@ -4,17 +4,14 @@ import com.server.storefront.constants.ApplicationConstants;
 import com.server.storefront.constants.ExceptionConstants;
 import com.server.storefront.constants.ProductConstants;
 import com.server.storefront.dto.CreatorProductDTO;
+import com.server.storefront.dto.DummyProductDTO;
 import com.server.storefront.dto.ProductDTO;
 import com.server.storefront.exception.*;
 import com.server.storefront.factory.PartnerHandlerFactory;
 import com.server.storefront.handler.BaseHandler;
-import com.server.storefront.model.CreatorProduct;
-import com.server.storefront.model.CreatorProfile;
-import com.server.storefront.model.Product;
-import com.server.storefront.repository.CreatorProductRepository;
-import com.server.storefront.repository.CreatorRepository;
-import com.server.storefront.repository.PartnerRepository;
-import com.server.storefront.repository.ProductRepository;
+import com.server.storefront.model.*;
+import com.server.storefront.model.Collection;
+import com.server.storefront.repository.*;
 import com.server.storefront.utils.PartnerUtil;
 import com.server.storefront.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +22,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -44,28 +44,113 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
+    private final CollectionRepository collectionRepository;
+
+    private final MediaRepository mediaRepository;
+
+
+//    @Override
+//    @Transactional
+//    public ProductDTO addProduct(String url, String creatorId) throws ProductException {
+//        log.info("Adding product {}", url);
+//        try {
+//            return checkProfileAndValidateProduct(url, creatorId);
+//        } catch (Exception e) {
+//            throw new ProductException(e.getMessage());
+//        }
+//    }
 
     @Override
     @Transactional
-    public ProductDTO addProduct(String url, String creatorId) throws ProductException {
-        log.info("Adding product {}", url);
+    public Map<String, Object> addProduct(DummyProductDTO dto, String creatorId) throws ProductException {
+        log.info("Adding products for {}", creatorId);
         try {
-            return checkProfileAndValidateProduct(url, creatorId);
+            return checkProfileAndValidateProduct(dto, creatorId);
         } catch (Exception e) {
             throw new ProductException(e.getMessage());
         }
     }
 
-    private ProductDTO checkProfileAndValidateProduct(String url, String creatorId) throws HandlerException, ProductException,
-            CreatorException, CreatorProductException, PartnerException {
-        CreatorProfile creatorObj = creatorRepository.findById(creatorId).orElse(null);
-        if (Objects.nonNull(creatorObj)) {
-            if (!checkIfProductExists(url, creatorId)) {
-                ProductDTO productDTO = validateHandlerAndFetchProduct(url);
-                Product productObj = validateProductAndSaveIfAbsent(productDTO, url);
-                return scrubAndSaveCreatorProduct(productDTO, productObj, creatorId, url, creatorObj);
-            } else throw new CreatorProductException("Product Already Exists");
-        } else throw new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND);
+    private Map<String, Object> checkProfileAndValidateProduct(DummyProductDTO dto, String creatorId) throws CreatorException, InterruptedException {
+        CreatorProfile creator = creatorRepository.findById("7e4a7f9a-560f-4519-84e8-b42b236cefa8")
+                .orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
+
+        Map<String, Object> resp = new HashMap<>();
+        if (Objects.nonNull(dto)) {
+            CompletableFuture<Set<CreatorProduct>> validateProductAndSaveIfAbsent = CompletableFuture.supplyAsync(() -> {
+                if (CollectionUtils.isEmpty(dto.getProducts())) return null;
+
+                Set<CreatorProduct> products = new HashSet<>();
+                for (String url : dto.getProducts()) {
+                    try {
+                        CreatorProduct creatorProduct = sanitizeAndProcessCreatorItems(url, creatorId, creator);
+                        products.add(creatorProduct);
+                    } catch (ProductException | HandlerException | PartnerException | CreatorProductException e) {
+                        log.error("Error while processing creator product", e);
+                    }
+                }
+                return products;
+            });
+            CompletableFuture<Collection> validateCollection = CompletableFuture.supplyAsync(() -> {
+                if (dto.isCollectionInd()) {
+                    Collection collectionObj = new Collection();
+                    Optional.ofNullable(dto.getCollection()).ifPresent((collection -> {
+                        collectionObj.setName(collection.getName());
+                        collectionObj.setDescription(collection.getDescription());
+                        collectionObj.setImageURL(collection.getDescription());
+                        collectionObj.setActiveInd(true);
+
+                        if (collection.isMediaInd()) {
+                            MediaData mediaData = collection.getMediaData();
+                            if (!StringUtils.hasText(mediaData.getId())) {
+                                mediaData.setId(UUID.randomUUID().toString());
+                                mediaData = mediaRepository.save(mediaData);
+                            }
+                            collectionObj.setMediaData(mediaData);
+                        }
+                    }));
+                    return collectionObj;
+                }
+                return null;
+            });
+            CompletableFuture<Map<String, Object>> response = validateProductAndSaveIfAbsent.thenCombine(validateCollection, (products, collection) -> {
+                if (Objects.nonNull(collection)) {
+                    collection.setCreatorProducts(products);
+                    collectionRepository.save(collection);
+                }
+
+                List<ProductDTO> productList = new ArrayList<>();
+                for (CreatorProduct p : products) {
+                    ProductDTO productDTO = new ProductDTO();
+                    /**
+                     * To Add Data Mapping Logic
+                     */
+                    productList.add(productDTO);
+                }
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("products", productList);
+                result.put("collection", collection);
+                return result;
+            });
+
+            try {
+                resp = response.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new InterruptedException("Error while processing creator products and collection");
+            }
+        }
+
+        return resp;
+    }
+
+    private CreatorProduct sanitizeAndProcessCreatorItems(String url, String creatorId, CreatorProfile creator) throws ProductException,
+            HandlerException, PartnerException, CreatorProductException {
+        if (!checkIfProductExists(url, creatorId)) {
+            ProductDTO productDTO = validateHandlerAndFetchProduct(url);
+            Product productObj = validateProductAndSaveIfAbsent(productDTO, url);
+            return scrubAndSaveCreatorProduct(productDTO, productObj, creatorId, url, creator);
+        } else throw new CreatorProductException("Product Already Exists");
     }
 
     private ProductDTO validateHandlerAndFetchProduct(String url) throws HandlerException, ProductException, PartnerException {
@@ -88,7 +173,7 @@ public class ProductServiceImpl implements ProductService {
         } else throw new ProductException(ExceptionConstants.PRODUCT_DETAILS_NOT_FOUND);
     }
 
-    private ProductDTO scrubAndSaveCreatorProduct(ProductDTO productDTO, Product productObj, String creatorId, String url, CreatorProfile creatorObj) throws ProductException {
+    private CreatorProduct scrubAndSaveCreatorProduct(ProductDTO productDTO, Product productObj, String creatorId, String url, CreatorProfile creatorObj) throws ProductException {
         Date now = new Date();
         CreatorProduct creatorProduct = new CreatorProduct();
         creatorProduct.setActiveInd(true);
@@ -109,8 +194,7 @@ public class ProductServiceImpl implements ProductService {
 
         creatorProductRepository.save(creatorProduct);
         log.info("Product Successfully Added for Creator {}", creatorObj.getUserName());
-        return productDTO;
-
+        return creatorProduct;
     }
 
     private void setAffiliateDetails(String code, CreatorProduct creatorProduct, Date now) {

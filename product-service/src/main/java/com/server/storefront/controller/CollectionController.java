@@ -1,7 +1,9 @@
 package com.server.storefront.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.server.storefront.dto.CollectionDTO;
 import com.server.storefront.exception.CreatorCollectionException;
+import com.server.storefront.helper.Views;
 import com.server.storefront.service.CollectionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class CollectionController {
 
     private final CollectionService collectionService;
 
+    @JsonView(Views.Private.class)
     @GetMapping("/{user_name}/collections")
     public ResponseEntity<Map<String, Object>> getAllCollectionsByCreator(@PathVariable("user_name") String creatorId,
                                                                           @RequestParam(value = "page", defaultValue = "0") int page,
@@ -33,6 +36,7 @@ public class CollectionController {
         }
     }
 
+    @JsonView(Views.Private.class)
     @GetMapping("/collections/{collection_id}")
     public ResponseEntity<CollectionDTO> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
             throws CreatorCollectionException {

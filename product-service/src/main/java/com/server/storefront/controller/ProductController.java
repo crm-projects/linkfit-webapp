@@ -1,8 +1,11 @@
 package com.server.storefront.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.server.storefront.dto.CreatorProductDTO;
+import com.server.storefront.dto.DummyProductDTO;
 import com.server.storefront.dto.ProductDTO;
 import com.server.storefront.exception.CreatorProductException;
+import com.server.storefront.helper.Views;
 import com.server.storefront.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +24,13 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @JsonView(Views.Public.class)
     @PostMapping("/{user_name}/products/add")
-    public ResponseEntity<ProductDTO> addProduct(@PathVariable("user_name") String userName,
-                                                 @RequestBody String url,
+    public ResponseEntity<Map<String, Object>> addProduct(@PathVariable("user_name") String userName,
+                                                 @RequestBody DummyProductDTO productDTO,
                                                  HttpServletRequest request) throws CreatorProductException {
         try {
-            return new ResponseEntity<>(productService.addProduct(url, userName), HttpStatus.OK);
+            return new ResponseEntity<>(productService.addProduct(productDTO, userName), HttpStatus.OK);
         } catch (Exception e) {
             throw new CreatorProductException(e.getMessage());
         }
