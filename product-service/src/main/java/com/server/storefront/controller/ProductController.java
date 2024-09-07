@@ -21,8 +21,8 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/{user-name}/products/add")
-    public ResponseEntity<ProductDTO> addProduct(@PathVariable("user-name") String userName,
+    @PostMapping("/{user_name}/products/add")
+    public ResponseEntity<ProductDTO> addProduct(@PathVariable("user_name") String userName,
                                                  @RequestBody String url,
                                                  HttpServletRequest request) throws CreatorProductException {
         try {
@@ -32,8 +32,8 @@ public class ProductController {
         }
     }
 
-    @GetMapping(value = "/products/{creatorId}")
-    public ResponseEntity<Map<String, Object>> getAllProductsByCreator(@PathVariable("creatorId") String creatorId,
+    @GetMapping(value = "/{user_name}/products")
+    public ResponseEntity<Map<String, Object>> getAllProductsByCreator(@PathVariable("user_name") String creatorId,
                                                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                                                        @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                                        HttpServletRequest request) throws CreatorProductException {
@@ -44,8 +44,8 @@ public class ProductController {
         }
     }
 
-    @GetMapping(value = "/product/{pid}")
-    public ResponseEntity<CreatorProductDTO> getCreatorProductById(@RequestParam(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
+    @GetMapping(value = "/products/{pid}")
+    public ResponseEntity<CreatorProductDTO> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.getProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {

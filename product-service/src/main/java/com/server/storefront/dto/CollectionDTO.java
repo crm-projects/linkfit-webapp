@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 
 @Getter
@@ -36,9 +36,10 @@ public class CollectionDTO {
     @JsonProperty("media_data")
     private MediaData mediaData;
 
+    @Transient
     @JsonProperty("product_count")
     private int count;
 
     @JsonProperty("product_list")
-    private List<CreatorProductDTO> product;
+    private Set<CreatorProductDTO> products;
 }

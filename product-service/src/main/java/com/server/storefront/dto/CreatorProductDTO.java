@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 public class CreatorProductDTO {
@@ -24,5 +26,11 @@ public class CreatorProductDTO {
     private String imageURL;
 
     @JsonProperty("affiliate_url")
-    private String affiliateCode;
+    private String affiliateUrl;
+
+    @JsonProperty("created_at")
+    private Date createdTime;
+
+    @JsonProperty("expires_at")
+    private Date expiryDate;
 }

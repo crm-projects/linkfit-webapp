@@ -1,0 +1,46 @@
+package com.server.storefront.controller;
+
+import com.server.storefront.dto.CollectionDTO;
+import com.server.storefront.exception.CreatorCollectionException;
+import com.server.storefront.service.CollectionService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@Slf4j
+@RestController
+@RequestMapping("/v1")
+@RequiredArgsConstructor
+public class CollectionController {
+
+    private final CollectionService collectionService;
+
+    @GetMapping("/{user_name}/collections")
+    public ResponseEntity<Map<String, Object>> getAllCollectionsByCreator(@PathVariable("user_name") String creatorId,
+                                                                          @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                          @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                                                          HttpServletRequest request) throws CreatorCollectionException {
+        try {
+            return new ResponseEntity<>(collectionService.getAllCollectionsByCreator(creatorId, page, limit), HttpStatus.OK);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw new CreatorCollectionException(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/collections/{collection_id}")
+    public ResponseEntity<CollectionDTO> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
+            throws CreatorCollectionException {
+        try {
+            return new ResponseEntity<>(collectionService.getCollectionById(collectionId), HttpStatus.OK);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw new CreatorCollectionException(ex.getMessage());
+        }
+    }
+}

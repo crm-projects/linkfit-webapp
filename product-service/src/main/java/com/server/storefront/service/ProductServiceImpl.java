@@ -165,7 +165,7 @@ public class ProductServiceImpl implements ProductService {
                     productDTO.setId(p.getId());
                     productDTO.setPid(p.getProduct().getProductId());
                     productDTO.setImageURL(p.getImageURL());
-                    productDTO.setAffiliateCode(getAffiliateUrl(p.getAffiliateCode()));
+                    productDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(p.getAffiliateCode()));
                     productDTO.setPrice(p.getPrice());
                     productDTO.setTitle(p.getTitle());
                     products.add(productDTO);
@@ -194,11 +194,6 @@ public class ProductServiceImpl implements ProductService {
         return productList;
     }
 
-
-    private String getAffiliateUrl(String code) {
-        return ProductConstants.AFFILIATE_BASE_URL + ApplicationConstants.PARAM_SEPARATOR_CHAR + code;
-    }
-
     @Override
     @Transactional(readOnly = true)
     public CreatorProductDTO getProductById(String productId) throws CreatorProductException, CreatorException {
@@ -211,7 +206,7 @@ public class ProductServiceImpl implements ProductService {
             creatorProductDTO.setId(product.getId());
             creatorProductDTO.setPid(product.getProduct().getProductId());
             creatorProductDTO.setPrice(product.getPrice());
-            creatorProductDTO.setAffiliateCode(product.getAffiliateCode());
+            creatorProductDTO.setAffiliateUrl(product.getAffiliateCode());
             creatorProductDTO.setTitle(product.getTitle());
             creatorProductDTO.setImageURL(product.getImageURL());
             return creatorProductDTO;

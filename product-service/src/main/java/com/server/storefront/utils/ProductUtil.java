@@ -1,5 +1,7 @@
 package com.server.storefront.utils;
 
+import com.server.storefront.constants.ApplicationConstants;
+import com.server.storefront.constants.ProductConstants;
 import com.server.storefront.exception.ProductException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,5 +51,9 @@ public class ProductUtil {
             number = number.divide(BigInteger.valueOf(62));
         }
         return base62.toString();
+    }
+
+    public static String getAffiliateUrl(String code) {
+        return ProductConstants.AFFILIATE_BASE_URL + ApplicationConstants.PARAM_SEPARATOR_CHAR + code;
     }
 }

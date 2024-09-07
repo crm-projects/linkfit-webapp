@@ -37,7 +37,7 @@ public class Collection {
     @JoinColumn(name = "MEDIA_ID")
     private MediaData mediaData;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "COLLECTION_PRODUCT_MAPPING",
             joinColumns = @JoinColumn(name = "COLLECTION_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "CREATOR_PRODUCT_ID", referencedColumnName = "ID"))
