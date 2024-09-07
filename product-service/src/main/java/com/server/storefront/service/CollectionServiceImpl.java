@@ -45,7 +45,7 @@ public class CollectionServiceImpl implements CollectionService {
             if (Objects.nonNull(creator)) {
                 log.info("Fetching collections for {}", userName);
                 PageRequest pageRequest = PageRequest.of(page, limit);
-                Page<Tuple> creatorCollections = collectionRepository.findAllCollectionsByCreatorId(creator.getId(), pageRequest);
+                Page<Tuple> creatorCollections = collectionRepository.findAllByCreatorId(creator.getId(), pageRequest);
                 hasNext = (creatorCollections.getTotalPages() - 1) - page > 0;
                 if (creatorCollections.isEmpty())
                     throw new CreatorCollectionException(CollectionConstants.NO_VALID_COLLECTIONS);
