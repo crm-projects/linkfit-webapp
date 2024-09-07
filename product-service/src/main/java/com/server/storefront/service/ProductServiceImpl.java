@@ -48,18 +48,9 @@ public class ProductServiceImpl implements ProductService {
 
     private final MediaRepository mediaRepository;
 
-
-//    @Override
-//    @Transactional
-//    public ProductDTO addProduct(String url, String creatorId) throws ProductException {
-//        log.info("Adding product {}", url);
-//        try {
-//            return checkProfileAndValidateProduct(url, creatorId);
-//        } catch (Exception e) {
-//            throw new ProductException(e.getMessage());
-//        }
-//    }
-
+    /**
+     * TODO - Should Re-write {@link DummyProductDTO}
+     */
     @Override
     @Transactional
     public Map<String, Object> addProduct(DummyProductDTO dto, String creatorId) throws ProductException {
@@ -72,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Map<String, Object> checkProfileAndValidateProduct(DummyProductDTO dto, String creatorId) throws CreatorException, InterruptedException {
-        CreatorProfile creator = creatorRepository.findById("7e4a7f9a-560f-4519-84e8-b42b236cefa8")
+        CreatorProfile creator = creatorRepository.findById(creatorId)
                 .orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
 
         Map<String, Object> resp = new HashMap<>();
