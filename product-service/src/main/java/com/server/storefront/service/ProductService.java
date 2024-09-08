@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ProductService {
 
-    Map<String, Object> addProduct(DummyProductDTO productDTO, String creatorId) throws ProductException;
+    Map<String, Object> addProduct(DummyProductDTO productDTO, String userName) throws ProductException;
 
     Map<String, Object> getAllProductsByCreator(String creatorId, int page, int limit) throws CreatorProductException;
 

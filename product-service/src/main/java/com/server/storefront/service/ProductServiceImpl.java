@@ -53,17 +53,17 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public Map<String, Object> addProduct(DummyProductDTO dto, String creatorId) throws ProductException {
-        log.info("Adding products for {}", creatorId);
+    public Map<String, Object> addProduct(DummyProductDTO dto, String userName) throws ProductException {
+        log.info("Adding products for {}", userName);
         try {
-            return checkProfileAndValidateProduct(dto, creatorId);
+            return checkProfileAndValidateProduct(dto, userName);
         } catch (Exception e) {
             throw new ProductException(e.getMessage());
         }
     }
 
-    private Map<String, Object> checkProfileAndValidateProduct(DummyProductDTO dto, String creatorId) throws CreatorException, InterruptedException {
-        CreatorProfile creator = creatorRepository.findById(creatorId)
+    private Map<String, Object> checkProfileAndValidateProduct(DummyProductDTO dto, String userName) throws CreatorException, InterruptedException {
+        CreatorProfile creator = creatorRepository.findByUserName(userName)
                 .orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
 
         Map<String, Object> resp = new HashMap<>();
@@ -74,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
                 Set<CreatorProduct> products = new HashSet<>();
                 for (String url : dto.getProducts()) {
                     try {
-                        CreatorProduct creatorProduct = sanitizeAndProcessCreatorItems(url, creatorId, creator);
+                        CreatorProduct creatorProduct = sanitizeAndProcessCreatorItems(url, userName, creator);
                         products.add(creatorProduct);
                     } catch (ProductException | HandlerException | PartnerException | CreatorProductException e) {
                         log.error("Error while processing creator product", e);
