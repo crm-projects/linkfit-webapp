@@ -36,7 +36,8 @@ subprojects {
 
         runtimeOnly 'com.mysql:mysql-connector-j'
 
-        implementation 'org.projectlombok:lombok:1.18.28'
+        compileOnly 'org.projectlombok:lombok:1.18.28'
+        annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
         implementation 'org.mindrot:jbcrypt:0.4'
 

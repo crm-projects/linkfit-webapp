@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/v1")
 @RestController
-public class PaymentsVerificationController {
+public class PaymentsAuthController {
 
     @Autowired
     private PaymentService paymentService;

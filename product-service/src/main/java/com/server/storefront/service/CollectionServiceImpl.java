@@ -66,7 +66,7 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     private CollectionDTO scrubCreatorCollectionItems(Tuple tuple) {
-        if (tuple.get(CollectionConstants.ACTIVE_IND, Boolean.class)) {
+        if (Boolean.TRUE.equals(tuple.get(CollectionConstants.ACTIVE_IND, Boolean.class))) {
             CollectionDTO collectionDTO = new CollectionDTO();
             collectionDTO.setId(tuple.get(CollectionConstants.ID, String.class));
             collectionDTO.setName(tuple.get(CollectionConstants.NAME, String.class));

@@ -1,8 +1,10 @@
 package com.server.storefront.service;
 
+import com.server.storefront.constants.AffiliateConstants;
 import com.server.storefront.constants.ApplicationConstants;
 import com.server.storefront.constants.ExceptionConstants;
 import com.server.storefront.constants.ProductConstants;
+import com.server.storefront.dto.CollectionDTO;
 import com.server.storefront.dto.CreatorProductDTO;
 import com.server.storefront.dto.DummyProductDTO;
 import com.server.storefront.dto.ProductDTO;
@@ -24,7 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -63,67 +68,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Map<String, Object> checkProfileAndValidateProduct(DummyProductDTO dto, String userName) throws CreatorException, InterruptedException {
-        CreatorProfile creator = creatorRepository.findByUserName(userName)
-                .orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
+        CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
 
         Map<String, Object> resp = new HashMap<>();
         if (Objects.nonNull(dto)) {
-            CompletableFuture<Set<CreatorProduct>> validateProductAndSaveIfAbsent = CompletableFuture.supplyAsync(() -> {
-                if (CollectionUtils.isEmpty(dto.getProducts())) return null;
-
-                Set<CreatorProduct> products = new HashSet<>();
-                for (String url : dto.getProducts()) {
-                    try {
-                        CreatorProduct creatorProduct = sanitizeAndProcessCreatorItems(url, userName, creator);
-                        products.add(creatorProduct);
-                    } catch (ProductException | HandlerException | PartnerException | CreatorProductException e) {
-                        log.error("Error while processing creator product", e);
-                    }
-                }
-                return products;
-            });
+            CompletableFuture<Set<CreatorProduct>> validateProductAndSaveIfAbsent = CompletableFuture.supplyAsync(() -> processProductItems(dto.getProducts(), userName, creator));
             CompletableFuture<Collection> validateCollection = CompletableFuture.supplyAsync(() -> {
-                if (dto.isCollectionInd()) {
-                    Collection collectionObj = new Collection();
-                    Optional.ofNullable(dto.getCollection()).ifPresent((collection -> {
-                        collectionObj.setName(collection.getName());
-                        collectionObj.setDescription(collection.getDescription());
-                        collectionObj.setImageURL(collection.getDescription());
-                        collectionObj.setActiveInd(true);
-
-                        if (collection.isMediaInd()) {
-                            MediaData mediaData = collection.getMediaData();
-                            if (!StringUtils.hasText(mediaData.getId())) {
-                                mediaData.setId(UUID.randomUUID().toString());
-                                mediaData = mediaRepository.save(mediaData);
-                            }
-                            collectionObj.setMediaData(mediaData);
-                        }
-                    }));
-                    return collectionObj;
-                }
+                if (dto.isCollectionInd()) scrubCollectionItems(dto.getCollection());
                 return null;
             });
-            CompletableFuture<Map<String, Object>> response = validateProductAndSaveIfAbsent.thenCombine(validateCollection, (products, collection) -> {
-                if (Objects.nonNull(collection)) {
-                    collection.setCreatorProducts(products);
-                    collectionRepository.save(collection);
-                }
-
-                List<ProductDTO> productList = new ArrayList<>();
-                for (CreatorProduct p : products) {
-                    ProductDTO productDTO = new ProductDTO();
-                    /**
-                     * To Add Data Mapping Logic
-                     */
-                    productList.add(productDTO);
-                }
-
-                Map<String, Object> result = new HashMap<>();
-                result.put("products", productList);
-                result.put("collection", collection);
-                return result;
-            });
+            CompletableFuture<Map<String, Object>> response = validateProductAndSaveIfAbsent.thenCombine(validateCollection, this::preparePostProcessing);
 
             try {
                 resp = response.get();
@@ -131,12 +85,66 @@ public class ProductServiceImpl implements ProductService {
                 throw new InterruptedException("Error while processing creator products and collection");
             }
         }
-
         return resp;
     }
 
-    private CreatorProduct sanitizeAndProcessCreatorItems(String url, String creatorId, CreatorProfile creator) throws ProductException,
-            HandlerException, PartnerException, CreatorProductException {
+    private Map<String, Object> preparePostProcessing(Set<CreatorProduct> products, Collection collection) {
+        if (Objects.nonNull(collection)) {
+            collection.setCreatorProducts(products);
+            collectionRepository.save(collection);
+        }
+
+        List<ProductDTO> productList = new ArrayList<>();
+        for (CreatorProduct p : products) {
+            ProductDTO productDTO = new ProductDTO();
+            /**
+             * To Add Data Mapping Logic
+             */
+            productList.add(productDTO);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("products", productList);
+        result.put("collection", collection);
+        return result;
+    }
+
+    private Collection scrubCollectionItems(CollectionDTO collectionDTO) {
+        Collection collectionObj = new Collection();
+        Optional.ofNullable(collectionDTO).ifPresent((collection -> {
+            collectionObj.setName(collection.getName());
+            collectionObj.setDescription(collection.getDescription());
+            collectionObj.setImageURL(collection.getDescription());
+            collectionObj.setActiveInd(true);
+
+            if (collection.isMediaInd()) {
+
+                MediaData mediaData = collection.getMediaData();
+                if (!StringUtils.hasText(mediaData.getId())) {
+                    mediaData.setId(UUID.randomUUID().toString());
+                    mediaData = mediaRepository.save(mediaData);
+                }
+                collectionObj.setMediaData(mediaData);
+            }
+        }));
+        return collectionObj;
+    }
+
+    private Set<CreatorProduct> processProductItems(List<String> products, String userName, CreatorProfile creator) {
+        if (CollectionUtils.isEmpty(products)) return Collections.emptySet();
+        Set<CreatorProduct> productSet = new HashSet<>();
+        for (String url : products) {
+            try {
+                CreatorProduct creatorProduct = sanitizeAndProcessCreatorItems(url, userName, creator);
+                productSet.add(creatorProduct);
+            } catch (ProductException | HandlerException | PartnerException | CreatorProductException e) {
+                log.error("Error while processing creator product", e);
+            }
+        }
+        return productSet;
+    }
+
+    private CreatorProduct sanitizeAndProcessCreatorItems(String url, String creatorId, CreatorProfile creator) throws ProductException, HandlerException, PartnerException, CreatorProductException {
         if (!checkIfProductExists(url, creatorId)) {
             ProductDTO productDTO = validateHandlerAndFetchProduct(url);
             Product productObj = validateProductAndSaveIfAbsent(productDTO, url);
@@ -289,5 +297,31 @@ public class ProductServiceImpl implements ProductService {
             log.error(ProductConstants.NO_VALID_PRODUCTS);
             throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RedirectView getLongUrlByCode(String code) throws CreatorProductException {
+        if (!StringUtils.hasLength(code)) throw new CreatorProductException("");
+
+        CreatorProduct product = creatorProductRepository.findByAffiliateCode(code).orElseThrow(() -> new CreatorProductException(""));
+        String baseProductUrl = product.getProduct().getProductURL();
+
+        if (StringUtils.hasLength(baseProductUrl)) {
+            String creator = product.getCreatedBy();
+            if (StringUtils.hasLength(creator)) {
+                /**
+                 * Using {@link RedirectView}
+                 */
+                UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseProductUrl)
+                        .queryParam(AffiliateConstants.UTM_MEDIUM, AffiliateConstants.SOURCE)
+                        .queryParam(AffiliateConstants.UTM_SOURCE, AffiliateConstants.SOURCE)
+                        .queryParam(AffiliateConstants.PLATFORM_ID, AffiliateConstants.SOURCE);
+
+                return new RedirectView(builder.toUriString());
+            }
+        }
+
+        return null;
     }
 }

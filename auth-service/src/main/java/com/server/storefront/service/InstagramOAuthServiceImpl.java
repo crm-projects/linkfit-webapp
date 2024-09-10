@@ -8,6 +8,7 @@ import com.server.storefront.dto.IGAccessTokenDTO;
 import com.server.storefront.dto.IGUserProfileDTO;
 import com.server.storefront.model.IGUserMedia;
 import com.server.storefront.model.IGUserProfile;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +27,10 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InstagramOAuthServiceImpl implements InstagramOAuthService {
 
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    private final WebClient.Builder webClientBuilder;
 
     @Override
     public Mono<ResponseEntity<IGUserProfileDTO>> retrieveTokensAndUserDetails() {

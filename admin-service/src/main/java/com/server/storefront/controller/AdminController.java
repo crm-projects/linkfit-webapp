@@ -2,7 +2,6 @@ package com.server.storefront.controller;
 
 import com.server.storefront.dto.PartnerDTO;
 import com.server.storefront.model.Partner;
-import com.server.storefront.model.Plan;
 import com.server.storefront.model.Platform;
 import com.server.storefront.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,16 +19,6 @@ public class AdminController {
 
     @Autowired
     AdminService adminService;
-
-    @PostMapping("/plan/save")
-    public ResponseEntity<Boolean> savePlanDetails(@RequestBody Plan plan, HttpServletRequest request) {
-        try {
-            return new ResponseEntity<>(adminService.savePlanDetails(plan), HttpStatus.OK);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
 
     @PostMapping("/platform/save")
     public ResponseEntity<Platform> savePlatformItems(@RequestBody Platform platform, HttpServletRequest request) {

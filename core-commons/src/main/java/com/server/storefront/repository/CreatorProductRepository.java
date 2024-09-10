@@ -18,4 +18,5 @@ public interface CreatorProductRepository extends JpaRepository<CreatorProduct, 
 
     Page<CreatorProduct> findAllByCreatorId(String creatorId, Pageable pageable);
 
+    Optional<CreatorProduct> findByAffiliateCode(String code);
 }

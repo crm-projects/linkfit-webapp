@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
 
@@ -53,6 +54,16 @@ public class ProductController {
         try {
             return new ResponseEntity<>(productService.getProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {
+            throw new CreatorProductException(ex.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/share/{affiliate_code}")
+    public RedirectView getLongUrl(@PathVariable("affiliate_code") String code, HttpServletRequest request) throws CreatorProductException {
+        try {
+            return productService.getLongUrlByCode(code);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());
         }
     }

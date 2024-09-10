@@ -2,7 +2,6 @@ dependencies {
     implementation project(path: ':core-commons')
     implementation project(path: ':admin-service')
     implementation project(path: ':auth-service')
-    implementation project(path: ':payments-service')
     implementation project(path: ':product-service')
     implementation project(path: ':analytics-service')
     implementation project(path: ':partner-service')

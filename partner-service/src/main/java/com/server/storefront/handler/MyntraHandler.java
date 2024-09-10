@@ -26,18 +26,22 @@ public class MyntraHandler implements BaseHandler {
     public ResponseEntity<ProductDTO> getProductDetails(String productURL) throws PartnerException {
 
         String productId = getProductId(productURL);
-        try {
-            ObjectNode response = restTemplate.getForObject(BASE_ENDPOINT + productId, ObjectNode.class);
-            if (Objects.nonNull(response)) {
-                ProductDTO productDTO = new ProductDTO();
-                return ResponseEntity.ok(productDTO);
-            } else {
-                log.error(PartnerConstants.NO_INFO);
-                throw new ProductException(PartnerConstants.NULL_OBJECT_RETURNED);
-            }
-        } catch (Exception e) {
-            throw new PartnerException(e.getMessage());
-        }
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setProductId(productId);
+        productDTO.setProductURL(productURL);
+        return ResponseEntity.ok(productDTO);
+//        try {
+//            ObjectNode response = restTemplate.getForObject(BASE_ENDPOINT + productId, ObjectNode.class);
+//            if (Objects.nonNull(response)) {
+//                ProductDTO productDTO = new ProductDTO();
+//                return ResponseEntity.ok(productDTO);
+//            } else {
+//                log.error(PartnerConstants.NO_INFO);
+//                throw new ProductException(PartnerConstants.NULL_OBJECT_RETURNED);
+//            }
+//        } catch (Exception e) {
+//            throw new PartnerException(e.getMessage());
+//        }
     }
 
 
