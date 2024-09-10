@@ -15,19 +15,19 @@ public class UserBankDetails {
     @Column(name = "ID")
     private String id = UUID.randomUUID().toString();
 
-    @JsonProperty("accountNumber")
+    @JsonProperty("account_number")
     @Column(name = "ACCOUNT_NUMBER")
     private String accountNumber;
 
-    @JsonProperty("bankIFSCCode")
+    @JsonProperty("ifsc_code")
     @Column(name = "IFSC_CODE")
     private String bankIFSCCode;
 
-    @JsonProperty("holderName")
+    @JsonProperty("holder_name")
     @Column(name = "ACC_HOLDER_NAME")
     private String accountHolderName;
 
-    @JsonProperty("panNumber")
+    @JsonProperty("pan_number")
     @Column(name = "PAN_DETAILS")
     private String permanentAccountNumber;
 
@@ -37,3 +37,4 @@ public class UserBankDetails {
     private CreatorProfile userProfile;
 
 }
+

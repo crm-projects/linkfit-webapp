@@ -1,17 +1,15 @@
 package com.server.storefront;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.storefront.model.CreatorProfile;
 import com.server.storefront.constants.ApplicationConstants;
 import com.server.storefront.model.Profile;
+import com.server.storefront.model.CreatorProfile;
 import lombok.SneakyThrows;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-
 public class Util {
 
-    public Profile generateUserProfile(String profile) {
+    public static Profile generateUserProfile(String profile) {
         if (!StringUtils.hasText(profile))
             return null;
         return switch (profile) {

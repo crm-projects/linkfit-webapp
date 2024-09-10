@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PartnerDTO {
 
-
     @JsonProperty(value = "name")
     private String name;
 

@@ -26,7 +26,6 @@
 		<module>analytics-service</module>
 		<module>auth-service</module>
 		<module>core-app</module>
-		<module>payments-service</module>
 		<module>product-service</module>
 		<module>core-commons</module>
 		<module>partner-service</module>

@@ -1,12 +1,14 @@
 package com.server.storefront.service;
 
+
 import com.server.storefront.dto.User;
 import com.server.storefront.dto.UserRegistration;
 import com.server.storefront.utils.PasswordUtil;
-import com.server.storefront.constants.ApplicationConstants;
+import com.server.storefront.repository.CreatorRepository;
 import com.server.storefront.model.CreatorProfile;
 import com.server.storefront.model.Profile;
-import com.server.storefront.repository.CreatorRepository;
+import com.server.storefront.constants.ApplicationConstants;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ public class SecurityServiceImpl implements SecurityService {
     public String validateAndRegisterUser(UserRegistration user, HttpServletRequest request) {
         if (Objects.isNull(user)) {
             log.error("");
+            throw new RuntimeException("");
         }
         String userType = request.getHeader(ApplicationConstants.STOREFRONT_USER);
         Profile userProfile = (Profile) request.getAttribute(ApplicationConstants.USER_PROFILE);
@@ -52,21 +55,11 @@ public class SecurityServiceImpl implements SecurityService {
             userProfile.setUserName(user.getUserName());
             userProfile.setEmailAddress(user.getUserEmail());
             userProfile.setPassword(PasswordUtil.encryptPassword(user.getUserPassword()));
-            validatePlanAndRegisterUser(userProfile, type);
+            creatorRepository.save((CreatorProfile) userProfile);
             return userProfile.getId();
         } catch (Exception ex) {
             log.error("");
             throw new RuntimeException();
-        }
-    }
-
-    private void validatePlanAndRegisterUser(Profile userProfile, String type) {
-        try {
-            if (type.equalsIgnoreCase(ApplicationConstants.CREATOR_PROFILE)) {
-                creatorRepository.save((CreatorProfile) userProfile);
-            }
-        } catch (Exception ex) {
-            log.error("");
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.server.storefront.holder;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@Data
+@Getter
+@Setter
 public class OTPHolder {
 
     public Map<String,String> emailOTPHolder = new HashMap<>();

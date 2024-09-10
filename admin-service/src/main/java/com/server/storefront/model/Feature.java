@@ -16,14 +16,14 @@ import java.util.UUID;
 public class Feature {
 
     @Id
-    @Column(name = "FEATURE_ID")
+    @Column(name = "ID")
     private String id = UUID.randomUUID().toString();
 
     @Column(name = "NAME")
     @JsonProperty("name")
     private String name;
 
-    @Column(name = "IS_ACTIVE_IND")
+    @Column(name = "ACTIVE_IND")
     @JsonProperty("activeInd")
     private boolean isActiveInd;
 

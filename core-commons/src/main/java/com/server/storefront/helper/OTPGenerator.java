@@ -17,7 +17,7 @@ public class OTPGenerator {
                 OTP.append(OTP_CHARS.charAt(random.nextInt(OTP_CHARS.length())));
             }
             return OTP.toString();
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             throw new RandomGeneratorException(ex.getMessage());
         }
     }

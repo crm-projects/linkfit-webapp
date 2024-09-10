@@ -1,5 +1,6 @@
 package com.server.storefront.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,6 @@ import java.util.Date;
 @Entity
 @Table(name = "PARTNER_CAMPAIGN_DETAILS")
 public class Campaign {
-
 
     @Id
     @Column(name = "ID")
@@ -47,4 +47,5 @@ public class Campaign {
     @MapsId
     @JoinColumn(name = "PRODUCT_ID")
     private Partner partner;
+
 }

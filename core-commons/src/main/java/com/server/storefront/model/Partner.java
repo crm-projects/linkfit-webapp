@@ -1,15 +1,18 @@
 package com.server.storefront.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -44,6 +47,8 @@ public class Partner {
     @Column(name = "ACTIVE_IND")
     private boolean activeInd;
 
+    @Nullable
     @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL)
     private List<Campaign> campaignList;
+
 }
