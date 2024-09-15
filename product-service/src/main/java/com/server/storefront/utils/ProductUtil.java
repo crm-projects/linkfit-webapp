@@ -13,7 +13,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
-@Slf4j
 public class ProductUtil {
 
     private static final char PRODUCT_IDENTIFIER = 'P';
@@ -32,7 +31,6 @@ public class ProductUtil {
     }
 
     public static String generateUniqueKey(String s, boolean isRootNode) throws ProductException {
-        log.info("Encoding Unique Key for {}", s);
         try {
             MessageDigest digest = MessageDigest.getInstance(SHA256);
             byte[] hash = digest.digest(s.getBytes(StandardCharsets.UTF_8));

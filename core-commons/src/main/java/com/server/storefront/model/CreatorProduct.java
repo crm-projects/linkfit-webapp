@@ -26,10 +26,16 @@ public class CreatorProduct {
     private String affiliateCode;
 
     @Column(name = "IMAGE_URL")
-    private String imageURL;
+    private String imageUrl;
 
     @Column(name = "PRICE")
     private long price;
+
+    @Column(name = "CURRENCY")
+    private String currency;
+
+    @Column(name = "CATEGORY")
+    private String category;
 
     @Column(name = "ACTIVE_IND")
     private boolean activeInd;
@@ -37,11 +43,9 @@ public class CreatorProduct {
     @Column(name = "CREATED_BY")
     private String createdBy;
 
-    @Nullable
     @Column(name = "CREATED_TIME")
     private Date createdTime;
 
-    @Nullable
     @Column(name = "AFFILIATE_EXPIRES_AT")
     private Date affiliateExpiresAt;
 

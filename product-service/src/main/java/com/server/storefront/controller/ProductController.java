@@ -3,7 +3,6 @@ package com.server.storefront.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.server.storefront.dto.CreatorProductDTO;
 import com.server.storefront.dto.DummyProductDTO;
-import com.server.storefront.dto.ProductDTO;
 import com.server.storefront.exception.CreatorProductException;
 import com.server.storefront.helper.Views;
 import com.server.storefront.service.ProductService;
@@ -28,8 +27,8 @@ public class ProductController {
     @JsonView(Views.Public.class)
     @PostMapping("/{user_name}/products/add")
     public ResponseEntity<Map<String, Object>> addProduct(@PathVariable("user_name") String userName,
-                                                 @RequestBody DummyProductDTO productDTO,
-                                                 HttpServletRequest request) throws CreatorProductException {
+                                                          @RequestBody DummyProductDTO productDTO,
+                                                          HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.addProduct(productDTO, userName), HttpStatus.OK);
         } catch (Exception e) {
@@ -58,8 +57,17 @@ public class ProductController {
         }
     }
 
-    @GetMapping(value = "/share/{affiliate_code}")
-    public RedirectView getLongUrl(@PathVariable("affiliate_code") String code, HttpServletRequest request) throws CreatorProductException {
+    @DeleteMapping(value = "/products/{pid}/delete")
+    public ResponseEntity<Boolean> deleteCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
+        try {
+            return new ResponseEntity<>(productService.deleteProductById(productId), HttpStatus.OK);
+        } catch (Exception ex) {
+            throw new CreatorProductException(ex.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/share/{code}")
+    public RedirectView getLongUrl(@PathVariable("code") String code, HttpServletRequest request) throws CreatorProductException {
         try {
             return productService.getLongUrlByCode(code);
         } catch (Exception ex) {

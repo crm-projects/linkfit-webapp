@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -74,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
         if (Objects.nonNull(dto)) {
             CompletableFuture<Set<CreatorProduct>> validateProductAndSaveIfAbsent = CompletableFuture.supplyAsync(() -> processProductItems(dto.getProducts(), userName, creator));
             CompletableFuture<Collection> validateCollection = CompletableFuture.supplyAsync(() -> {
-                if (dto.isCollectionInd()) scrubCollectionItems(dto.getCollection());
+                if (dto.isCollectionInd()) return scrubCollectionItems(dto.getCollection());
                 return null;
             });
             CompletableFuture<Map<String, Object>> response = validateProductAndSaveIfAbsent.thenCombine(validateCollection, this::preparePostProcessing);
@@ -153,14 +152,27 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductDTO validateHandlerAndFetchProduct(String url) throws HandlerException, ProductException, PartnerException {
+        Map<String, Object> handlerParams = getPartnerHandler(url);
+        if (!handlerParams.isEmpty()) {
+            BaseHandler handler = (BaseHandler) handlerParams.get("handler");
+            String partner = (String) handlerParams.get("partner");
+            return retrieveProductDetailsFromPartner(handler, url, partner);
+        }
+        return new ProductDTO();
+    }
+
+    private Map<String, Object> getPartnerHandler(String url) throws HandlerException {
         String partner = PartnerUtil.getDomainName(url);
         if (partnerRepository.existsByName(partner)) {
             BaseHandler handler = productHandlerFactory.getHandler(partner);
-            return retrieveProductDetailsFromPartner(handler, url, partner);
+            Map<String, Object> map = new HashMap<>();
+            map.put("partner", partner);
+            map.put("handler", handler);
+            return map;
         } else {
             log.info(ProductConstants.NO_VALID_PARTNER);
-            return new ProductDTO();
         }
+        return Collections.emptyMap();
     }
 
     private ProductDTO retrieveProductDetailsFromPartner(BaseHandler handler, String url, String partner) throws ProductException, PartnerException {
@@ -180,7 +192,7 @@ public class ProductServiceImpl implements ProductService {
         creatorProduct.setCreatedTime(now);
         creatorProduct.setCreator(creatorObj);
         creatorProduct.setProduct(productObj);
-        creatorProduct.setImageURL(productDTO.getImageUrl());
+        creatorProduct.setImageUrl(productDTO.getImageUrl());
         creatorProduct.setPrice(productDTO.getPrice());
 
         StringBuilder toHash = new StringBuilder(url);
@@ -247,7 +259,7 @@ public class ProductServiceImpl implements ProductService {
                     CreatorProductDTO productDTO = new CreatorProductDTO();
                     productDTO.setId(p.getId());
                     productDTO.setPid(p.getProduct().getProductId());
-                    productDTO.setImageURL(p.getImageURL());
+                    productDTO.setImageURL(p.getImageUrl());
                     productDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(p.getAffiliateCode()));
                     productDTO.setPrice(p.getPrice());
                     productDTO.setTitle(p.getTitle());
@@ -291,7 +303,7 @@ public class ProductServiceImpl implements ProductService {
             creatorProductDTO.setPrice(product.getPrice());
             creatorProductDTO.setAffiliateUrl(product.getAffiliateCode());
             creatorProductDTO.setTitle(product.getTitle());
-            creatorProductDTO.setImageURL(product.getImageURL());
+            creatorProductDTO.setImageURL(product.getImageUrl());
             return creatorProductDTO;
         } else {
             log.error(ProductConstants.NO_VALID_PRODUCTS);
@@ -300,11 +312,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public RedirectView getLongUrlByCode(String code) throws CreatorProductException {
-        if (!StringUtils.hasLength(code)) throw new CreatorProductException("");
+    @Transactional
+    public boolean deleteProductById(String productId) throws CreatorProductException {
+        if (!StringUtils.hasLength(productId)) {
+            throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
+        }
+        CreatorProduct product = creatorProductRepository.findById(productId).orElseThrow(() -> new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS));
+        product.setActiveInd(false);
+        creatorProductRepository.save(product);
+        return true;
+    }
 
-        CreatorProduct product = creatorProductRepository.findByAffiliateCode(code).orElseThrow(() -> new CreatorProductException(""));
+    @Override
+    @Transactional(readOnly = true)
+    public RedirectView getLongUrlByCode(String code) throws CreatorProductException, HandlerException {
+        if (!StringUtils.hasLength(code)) throw new CreatorProductException(ProductConstants.NO_VALID_CODE);
+
+        CreatorProduct product = creatorProductRepository.findByAffiliateCode(code).orElseThrow(() -> new CreatorProductException(ProductConstants.NO_VALID_CODE));
         String baseProductUrl = product.getProduct().getProductURL();
 
         if (StringUtils.hasLength(baseProductUrl)) {
@@ -313,15 +337,21 @@ public class ProductServiceImpl implements ProductService {
                 /**
                  * Using {@link RedirectView}
                  */
-                UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseProductUrl)
-                        .queryParam(AffiliateConstants.UTM_MEDIUM, AffiliateConstants.SOURCE)
-                        .queryParam(AffiliateConstants.UTM_SOURCE, AffiliateConstants.SOURCE)
-                        .queryParam(AffiliateConstants.PLATFORM_ID, AffiliateConstants.SOURCE);
-
-                return new RedirectView(builder.toUriString());
+                String redirectUrl = processRedirectUrl(baseProductUrl);
+                return new RedirectView(redirectUrl);
             }
         }
-
         return null;
+    }
+
+    private String processRedirectUrl(String baseProductUrl) throws HandlerException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseProductUrl)
+                .queryParam(AffiliateConstants.UTM_MEDIUM, AffiliateConstants.SOURCE)
+                .queryParam(AffiliateConstants.UTM_SOURCE, AffiliateConstants.SOURCE)
+                .queryParam(AffiliateConstants.PLATFORM_ID, AffiliateConstants.SOURCE);
+
+        Map<String, Object> objectMap = getPartnerHandler(baseProductUrl);
+        BaseHandler handler = (BaseHandler) objectMap.get("handler");
+        return handler.buildRedirectUrl(builder);
     }
 }

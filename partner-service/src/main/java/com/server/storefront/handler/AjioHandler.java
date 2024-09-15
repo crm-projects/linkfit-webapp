@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Objects;
 
@@ -37,6 +38,11 @@ public class AjioHandler implements BaseHandler {
         } catch (Exception e) {
             throw new PartnerException(e.getMessage());
         }
+    }
+
+    @Override
+    public String buildRedirectUrl(UriComponentsBuilder builder) {
+        return builder.toUriString();
     }
 
     /**

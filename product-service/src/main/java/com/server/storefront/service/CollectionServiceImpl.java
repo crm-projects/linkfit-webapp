@@ -126,7 +126,7 @@ public class CollectionServiceImpl implements CollectionService {
                         CreatorProductDTO creatorProductDTO = new CreatorProductDTO();
                         creatorProductDTO.setId(product.getId());
                         creatorProductDTO.setTitle(product.getTitle());
-                        creatorProductDTO.setImageURL(product.getImageURL());
+                        creatorProductDTO.setImageURL(product.getImageUrl());
                         creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
                         creatorProductDTO.setPrice(product.getPrice());
                         creatorProductDTO.setCreatedTime(product.getCreatedTime());
