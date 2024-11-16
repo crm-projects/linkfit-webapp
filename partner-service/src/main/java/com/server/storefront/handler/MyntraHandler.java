@@ -45,12 +45,6 @@ public class MyntraHandler implements BaseHandler {
 //        }
     }
 
-    @Override
-    public String buildRedirectUrl(UriComponentsBuilder builder) {
-        return builder.toUriString();
-    }
-
-
     /**
      * URL: <a href="https://www.myntra.com/jeans/mufti/mufti-men-slim-fit-stretchable-jeans/21908310/buy"></a>
      * Product ID: 21908310
@@ -69,5 +63,9 @@ public class MyntraHandler implements BaseHandler {
         }
     }
 
+    @Override
+    public String buildRedirectUrl(UriComponentsBuilder builder) {
+        return builder.toUriString();
+    }
 
 }

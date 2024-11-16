@@ -1,0 +1,15 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
+dependencies {
+    //Spring Data Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Disable bootJar if this module is not a standalone Spring Boot application
+tasks.withType(BootJar).configureEach {
+    enabled = false
+}

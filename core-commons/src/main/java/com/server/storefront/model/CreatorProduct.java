@@ -49,11 +49,11 @@ public class CreatorProduct {
     @Column(name = "AFFILIATE_EXPIRES_AT")
     private Date affiliateExpiresAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATOR_ID", nullable = false)
     private CreatorProfile creator;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRODUCT_ID", nullable = false)
     private Product product;
 

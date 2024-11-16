@@ -37,7 +37,10 @@ public class Collection {
     @Column(name = "ACTIVE_IND")
     private boolean activeInd;
 
-    @Nullable
+    @JsonView(Views.Private.class)
+    @Column(name = "CREATOR_ID")
+    private String creatorId;
+
     @OneToOne
     @JsonView(Views.Public.class)
     @JoinColumn(name = "MEDIA_ID")

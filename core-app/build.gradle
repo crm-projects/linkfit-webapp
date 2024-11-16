@@ -1,10 +1,10 @@
 dependencies {
+    implementation project(path: ':core-config')
     implementation project(path: ':core-commons')
-    implementation project(path: ':admin-service')
-    implementation project(path: ':auth-service')
-    implementation project(path: ':product-service')
-    implementation project(path: ':analytics-service')
+    implementation project(path: ':user-service')
+    implementation project(path: ':creator-service')
     implementation project(path: ':partner-service')
+
 }
 
 springBoot {

@@ -1,0 +1,12 @@
+package com.server.storefront.constants;
+
+public class Path {
+
+    private Path() { }
+
+    public static final String GENERATE_OTP = "/auth/otp/generate";
+    public static final String VALIDATE_AND_SIGN_UP = "/auth/otp/validate";
+    public static final String LOGIN = "/auth/login";
+    public static final String CHECK_USERNAME = "/check/username";
+
+}
