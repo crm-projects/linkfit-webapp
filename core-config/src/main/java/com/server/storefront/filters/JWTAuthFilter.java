@@ -1,6 +1,6 @@
 package com.server.storefront.filters;
 
-import com.server.storefront.constants.Path;
+import com.server.storefront.utils.Path;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -27,12 +26,13 @@ public class JWTAuthFilter implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
-        String path = request.getRequestURI().substring(4); //api/
-        Set<String> whitelistedPaths = loadWhiteListedPaths();
-        Set<String> swaggerPaths = loadSwaggerPaths();
+
+        String path = request.getRequestURI().substring(4);
+        Set<String> whitelistedPaths = Path.loadWhiteListedPaths();
+        Set<String> swaggerPaths = Path.loadSwaggerPaths();
         Predicate<String> isPathWhitelisted = whitelistedPaths::contains;
 
-        boolean isSwagger = loadSwaggerPaths().stream().anyMatch(path::startsWith);
+        boolean isSwagger = swaggerPaths.stream().anyMatch(path::startsWith);
 
         if(isSwagger) {
             log.info("Skipping JWT Validation since condition met for path: {}", path);
@@ -83,26 +83,5 @@ public class JWTAuthFilter implements HandlerInterceptor {
     @Override
     public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, Exception exception) {
         /* TODO document why this method is empty */
-    }
-
-    private static Set<String> loadWhiteListedPaths() {
-        Set<String> paths = new HashSet<>();
-        paths.add(Path.CHECK_USERNAME);
-        paths.add(Path.GENERATE_OTP);
-        paths.add(Path.LOGIN);
-        paths.add(Path.VALIDATE_AND_SIGN_UP);
-        paths.add(Path.ACTUATOR);
-        paths.add(Path.HEALTH);
-
-        return paths;
-
-    }
-
-    private static Set<String> loadSwaggerPaths() {
-        Set<String> paths = new HashSet<>();
-        paths.add(Path.SWAGGER);
-        paths.add(Path.SWAGGER_UI);
-
-        return paths;
     }
 }
