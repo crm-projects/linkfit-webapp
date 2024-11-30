@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartnerDTO {
+public class PartnerLite {
 
     @JsonProperty(value = "name")
     private String name;

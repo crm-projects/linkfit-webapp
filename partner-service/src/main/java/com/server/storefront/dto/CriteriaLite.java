@@ -1,15 +1,15 @@
 package com.server.storefront.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-public class CreatorCriteriaDTO {
+public class CriteriaLite {
 
     private boolean portfolioRequired;
 

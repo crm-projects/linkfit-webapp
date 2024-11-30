@@ -7,9 +7,9 @@ import com.server.storefront.exception.PartnerException;
 import com.server.storefront.model.Campaign;
 import com.server.storefront.model.Partner;
 import com.server.storefront.repository.PartnerRepository;
-import com.server.storefront.dto.CampaignDTO;
-import com.server.storefront.dto.CreatorCriteriaDTO;
-import com.server.storefront.dto.PartnerDTO;
+import com.server.storefront.dto.CampaignLite;
+import com.server.storefront.dto.CriteriaLite;
+import com.server.storefront.dto.PartnerLite;
 import com.server.storefront.repository.CreatorCampaignRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,17 +53,17 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     @Transactional
-    public CampaignDTO launchCampaign(CampaignDTO campaignDTO) throws CampaignException {
+    public CampaignLite launchCampaign(CampaignLite campaignLite) throws CampaignException {
         try {
-            if (Objects.isNull(campaignDTO)) {
+            if (Objects.isNull(campaignLite)) {
                 log.error("Null Object encountered");
                 throw new CampaignException("Null Object encountered");
             }
 
-            if (StringUtils.hasLength(campaignDTO.getPartnerId())) {
-                Partner partner = partnerRepository.findById(campaignDTO.getPartnerId()).orElse(null);
+            if (StringUtils.hasLength(campaignLite.getPartnerId())) {
+                Partner partner = partnerRepository.findById(campaignLite.getPartnerId()).orElse(null);
                 if (Objects.nonNull(partner)) {
-                    return processCreatorCampaignItems(campaignDTO, partner);
+                    return processCreatorCampaignItems(campaignLite, partner);
                 } else {
                     log.error("");
                     throw new PartnerException("");
@@ -76,29 +76,29 @@ public class PartnerServiceImpl implements PartnerService {
         return null;
     }
 
-    private CampaignDTO processCreatorCampaignItems(CampaignDTO campaignDTO, Partner partner) {
+    private CampaignLite processCreatorCampaignItems(CampaignLite campaignLite, Partner partner) {
         Campaign campaign = new Campaign();
-        if (StringUtils.hasLength(campaignDTO.getId())) {
-            campaign = campaignRepository.findById(campaignDTO.getId()).orElse(null);
+        if (StringUtils.hasLength(campaignLite.getId())) {
+            campaign = campaignRepository.findById(campaignLite.getId()).orElse(null);
             if (Objects.nonNull(campaign)) {
-                createUpdateCampaignItems(campaign, campaignDTO, partner);
-                return campaignDTO;
+                createUpdateCampaignItems(campaign, campaignLite, partner);
+                return campaignLite;
             }
         } else {
             campaign.setStartDate(new Date());
-            createUpdateCampaignItems(campaign, campaignDTO, partner);
-            return campaignDTO;
+            createUpdateCampaignItems(campaign, campaignLite, partner);
+            return campaignLite;
         }
         return null;
     }
 
-    private void createUpdateCampaignItems(Campaign campaign, CampaignDTO campaignDTO, Partner partner) {
-        campaign.setTitle(campaignDTO.getTitle());
+    private void createUpdateCampaignItems(Campaign campaign, CampaignLite campaignLite, Partner partner) {
+        campaign.setTitle(campaignLite.getTitle());
         campaign.setDescription(campaign.getDescription());
         campaign.setCommissionRateForPlatform(0);
-        campaign.setCommissionRateForCreator(campaignDTO.getCommissionRateForCreator());
-        campaign.setEndDate(campaignDTO.getEndDate());
-        campaign.setCreatorCriteria(Util.convertJSONToString(campaignDTO.getCreatorCriteria()));
+        campaign.setCommissionRateForCreator(campaignLite.getCommissionRateForCreator());
+        campaign.setEndDate(campaignLite.getEndDate());
+        campaign.setCreatorCriteria(Util.convertJSONToString(campaignLite.getCreatorCriteria()));
         campaign.setActiveInd(true);
         campaign.setPartner(partner);
 
@@ -117,22 +117,22 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignDTO getCampaignById(String campaignId) throws CampaignException {
+    public CampaignLite getCampaignById(String campaignId) throws CampaignException {
         if (!StringUtils.hasLength(campaignId)) {
             throw new CampaignException("");
         }
         Campaign campaign = campaignRepository.findById(campaignId).orElse(null);
         if (Objects.nonNull(campaign)) {
-            CampaignDTO campaignDTO = new CampaignDTO();
-            campaignDTO.setTitle(campaign.getTitle());
-            campaignDTO.setDescription(campaign.getDescription());
-            campaignDTO.setCommissionRateForCreator(campaign.getCommissionRateForCreator());
-            campaignDTO.setStartDate(campaign.getStartDate());
-            campaignDTO.setEndDate(campaign.getEndDate());
-            campaignDTO.setActiveInd(campaign.isActiveInd());
-            CreatorCriteriaDTO creatorCriteriaDTO = Util.convertStringToJSON(campaign.getCreatorCriteria(), CreatorCriteriaDTO.class);
-            campaignDTO.setCreatorCriteria(creatorCriteriaDTO);
-            return campaignDTO;
+            CampaignLite campaignLite = new CampaignLite();
+            campaignLite.setTitle(campaign.getTitle());
+            campaignLite.setDescription(campaign.getDescription());
+            campaignLite.setCommissionRateForCreator(campaign.getCommissionRateForCreator());
+            campaignLite.setStartDate(campaign.getStartDate());
+            campaignLite.setEndDate(campaign.getEndDate());
+            campaignLite.setActiveInd(campaign.isActiveInd());
+            CriteriaLite criteriaLite = Util.convertStringToJSON(campaign.getCreatorCriteria(), CriteriaLite.class);
+            campaignLite.setCreatorCriteria(criteriaLite);
+            return campaignLite;
         } else {
             log.error("");
             throw new CampaignException("");
@@ -141,26 +141,26 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CampaignDTO> getAllCampaignByPartnerId(String partnerId) throws PartnerException, CampaignException {
+    public List<CampaignLite> getAllCampaignByPartnerId(String partnerId) throws PartnerException, CampaignException {
         if (!StringUtils.hasLength(partnerId)) {
             throw new PartnerException("");
         }
         try {
-            List<CampaignDTO> campaignList = new ArrayList<>();
+            List<CampaignLite> campaignList = new ArrayList<>();
             Partner partner = partnerRepository.findById(partnerId).orElse(null);
             if (Objects.nonNull(partner)) {
                 List<Campaign> campaigns = partner.getCampaignList();
                 if (!CollectionUtils.isEmpty(campaigns)) {
                     for (Campaign campaign : campaigns) {
-                        CampaignDTO campaignDTO = new CampaignDTO();
-                        campaignDTO.setTitle(campaign.getTitle());
-                        campaignDTO.setDescription(campaign.getDescription());
-                        campaignDTO.setStartDate(campaign.getStartDate());
-                        campaignDTO.setEndDate(campaign.getEndDate());
-                        campaignDTO.setCommissionRateForCreator(campaign.getCommissionRateForCreator());
-                        campaignDTO.setActiveInd(campaign.isActiveInd());
-                        campaignDTO.setCreatorCriteria(Util.convertStringToJSON(campaign.getCreatorCriteria(), CreatorCriteriaDTO.class));
-                        campaignList.add(campaignDTO);
+                        CampaignLite campaignLite = new CampaignLite();
+                        campaignLite.setTitle(campaign.getTitle());
+                        campaignLite.setDescription(campaign.getDescription());
+                        campaignLite.setStartDate(campaign.getStartDate());
+                        campaignLite.setEndDate(campaign.getEndDate());
+                        campaignLite.setCommissionRateForCreator(campaign.getCommissionRateForCreator());
+                        campaignLite.setActiveInd(campaign.isActiveInd());
+                        campaignLite.setCreatorCriteria(Util.convertStringToJSON(campaign.getCreatorCriteria(), CriteriaLite.class));
+                        campaignList.add(campaignLite);
                     }
                 }
                 return campaignList;
@@ -191,13 +191,13 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     private Map<String, Object> scrubPartnerItems(Page<Partner> partners, int page, boolean hasNext) {
-        List<PartnerDTO> partnerList = new ArrayList<>();
+        List<PartnerLite> partnerList = new ArrayList<>();
         for (Partner partner : partners) {
-            PartnerDTO partnerDTO = new PartnerDTO();
-            partnerDTO.setName(partner.getName());
-            partnerDTO.setDomain(partner.getDomain());
-            partnerDTO.setAffiliateValue(partner.getAffiliatePercentage());
-            partnerList.add(partnerDTO);
+            PartnerLite partnerLite = new PartnerLite();
+            partnerLite.setName(partner.getName());
+            partnerLite.setDomain(partner.getDomain());
+            partnerLite.setAffiliateValue(partner.getAffiliatePercentage());
+            partnerList.add(partnerLite);
         }
 
         Map<String, Object> pageObject = new HashMap<>();

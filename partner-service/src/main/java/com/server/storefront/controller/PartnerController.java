@@ -1,13 +1,11 @@
 package com.server.storefront.controller;
 
-import com.server.storefront.dto.CampaignDTO;
-import com.server.storefront.dto.PartnerDTO;
+import com.server.storefront.dto.CampaignLite;
 import com.server.storefront.exception.PartnerException;
 import com.server.storefront.service.PartnerService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,16 +34,16 @@ public class PartnerController {
     }
 
     @PostMapping("/campaigns/add")
-    public ResponseEntity<CampaignDTO> launchCreatorCampaign(@RequestBody CampaignDTO campaignDTO, HttpServletRequest request) throws PartnerException {
+    public ResponseEntity<CampaignLite> launchCreatorCampaign(@RequestBody CampaignLite campaignLite, HttpServletRequest request) throws PartnerException {
         try {
-            return new ResponseEntity<>(partnerService.launchCampaign(campaignDTO), HttpStatus.OK);
+            return new ResponseEntity<>(partnerService.launchCampaign(campaignLite), HttpStatus.OK);
         } catch (Exception ex) {
             throw new PartnerException(ex.getMessage());
         }
     }
 
     @GetMapping("/campaigns/{campaign_id}")
-    public ResponseEntity<CampaignDTO> getCreatorCampaignById(@PathVariable(name = "campaign_id") String campaignId, HttpServletRequest request) throws PartnerException {
+    public ResponseEntity<CampaignLite> getCreatorCampaignById(@PathVariable(name = "campaign_id") String campaignId, HttpServletRequest request) throws PartnerException {
         try {
             return new ResponseEntity<>(partnerService.getCampaignById(campaignId), HttpStatus.OK);
         } catch (Exception ex) {
@@ -54,7 +52,7 @@ public class PartnerController {
     }
 
     @GetMapping("/{partner-user-name}/campaigns")
-    public ResponseEntity<List<CampaignDTO>> getAllCreatorCampaigns(@PathVariable(name = "partner-user-name") String partnerId, HttpServletRequest request) throws PartnerException {
+    public ResponseEntity<List<CampaignLite>> getAllCreatorCampaigns(@PathVariable(name = "partner-user-name") String partnerId, HttpServletRequest request) throws PartnerException {
         try {
             return new ResponseEntity<>(partnerService.getAllCampaignByPartnerId(partnerId), HttpStatus.OK);
         } catch (Exception ex) {

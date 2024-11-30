@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,7 +27,7 @@ public class JWTAuthFilter implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
-        String path = request.getRequestURI();
+        String path = request.getRequestURI().substring(4); //api/
         Set<String> whitelistedPaths = loadWhiteListedPaths();
         Predicate<String> isPathWhitelisted = whitelistedPaths::contains;
 
@@ -43,6 +44,7 @@ public class JWTAuthFilter implements HandlerInterceptor {
             /*
              * TODO : Should add HttpStatus.UNAUTHORIZED as status code.
              */
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
 
@@ -60,20 +62,20 @@ public class JWTAuthFilter implements HandlerInterceptor {
             return true;
         } catch (Exception e) {
             // Token is invalid, block the request
-
-            /*
-             * TODO : Should add HttpStatus.UNAUTHORIZED as status code.
-             */
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
     }
 
     @Override
     public void postHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, ModelAndView model) {
+        /* TODO document why this method is empty */
     }
 
     @Override
-    public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, Exception exception) { }
+    public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, Exception exception) {
+        /* TODO document why this method is empty */
+    }
 
     private static Set<String> loadWhiteListedPaths() {
         Set<String> paths = new HashSet<>();
@@ -81,6 +83,8 @@ public class JWTAuthFilter implements HandlerInterceptor {
         paths.add(Path.GENERATE_OTP);
         paths.add(Path.LOGIN);
         paths.add(Path.VALIDATE_AND_SIGN_UP);
+        paths.add(Path.ACTUATOR);
+        paths.add(Path.HEALTH);
 
         return paths;
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.storefront.dto.BaseProfile;
 import com.server.storefront.dto.CreatorProfile;
 import com.server.storefront.dto.Credentials;
+import com.server.storefront.exception.StartupException;
 import com.server.storefront.repository.RedisRepository;
 import com.server.storefront.util.JWTUtil;
 import com.server.storefront.util.OTPUtil;
@@ -44,10 +45,11 @@ public class StartupServiceImpl implements StartupService {
     private final RedisRepository redisRepository;
 
     @Override
-    public boolean generateOtpByEmail(Credentials credentials) {
+    public boolean generateOtpByEmail(Credentials credentials) throws StartupException {
         if (!StringUtils.hasText(credentials.getKey()) &&
                 !credentials.getKey().matches(EMAIL_PATTERN)) {
-            log.error("");
+            log.error("Email address is not valid");
+            throw new StartupException("Email address is not valid. Please try again");
         }
 
         String otp = OTPUtil.generateOTP();
@@ -59,12 +61,12 @@ public class StartupServiceImpl implements StartupService {
         } catch (Exception ex) {
             //TODO : Throw dedicated exceptions.
             log.error(ex.getMessage());
+            throw new StartupException(ex.getMessage());
         }
-
-        return false;
     }
 
     private void publishToAmazonSES() {
+        log.info("Started publishing to Amazon SES");
     }
 
     private void publishToRedis(Credentials credentials, String otp) {
@@ -79,31 +81,31 @@ public class StartupServiceImpl implements StartupService {
     }
 
     private void publishToKafka(String key, String otp) {
-        Map<String, String> kafkaMessage = Map.of(key, otp);
         log.info("Started publishing to Kafka");
     }
 
     @Override
     public boolean validateUsername(String userName) {
         // TODO : Write logic to query Elasticsearch for the data rather than Postgres.
+
         return false;
     }
 
     @Override
     @Transactional
-    public Map<String, Object> processUserRegistration(Map<String, String> userDetails, String profile) {
+    public Map<String, Object> processUserRegistration(Map<String, String> userDetails, String profile) throws StartupException {
 
         if(userDetails.isEmpty()){
-            //TODO : Throw dedicated exceptions.
-            log.error("");
+            log.error("Invalid user input");
+            throw new StartupException("Invalid user input. Please try again");
         }
 
         String email = userDetails.get(EMAIL);
         String otp = userDetails.get(OTP);
 
         if (!StringUtils.hasText(email)) {
-            //TODO : Throw dedicated exceptions.
-            log.error("");
+            log.error("Email address is empty. Please try again with valid email");
+            throw new StartupException("Email address is empty. Please try again with valid email");
         }
 
         Optional<Credentials> validUserCredentials = getValidCredentials(email, otp);
@@ -136,7 +138,7 @@ public class StartupServiceImpl implements StartupService {
         return new CreatorProfile(credentials.getKey(), credentials.getValue());
     }
 
-    public Optional<Credentials> getValidCredentials(String email, String otp) {
+    public Optional<Credentials> getValidCredentials(String email, String otp) throws StartupException {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             log.info("Validating OTP for: {}", email);
@@ -144,10 +146,9 @@ public class StartupServiceImpl implements StartupService {
             });
             return value.get(OTP).equals(otp) ? Optional.ofNullable((Credentials) value.get(USER_CREDENTIALS)) : Optional.empty();
         } catch (Exception ex) {
-            //TODO : Throw dedicated exceptions.
             log.error(ex.getMessage());
+            throw new StartupException(ex.getMessage());
         }
-        return Optional.empty();
     }
 
     private String generateAuthToken(String email) {

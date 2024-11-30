@@ -8,33 +8,26 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
-/**
- * Configuration class for {@link JavaMailSender}
- *
- * {@link JavaMailSender}
- * @author Vas
- * @version 1.0
- */
 @Configuration
 public class JavaMailConfig {
 
-    private final static int GMAIL_SMTP_PORT = 0;
+    private static final int GMAIL_SMTP_PORT = 0;
 
     @Value("${spring.mail.host}")
-    private static String MAIL_HOST;
+    private static String host;
 
     @Value("${spring.mail.username}")
-    private static String MAIL_USERNAME;
+    private static String userName;
 
     @Value("${spring.mail.password}")
-    private static String MAIL_PASSWORD;
+    private static String password;
 
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(MAIL_HOST);
-        mailSender.setUsername(MAIL_USERNAME);
-        mailSender.setPassword(MAIL_PASSWORD);
+        mailSender.setHost(host);
+        mailSender.setUsername(userName);
+        mailSender.setPassword(password);
         mailSender.setPort(GMAIL_SMTP_PORT);
 
         Properties properties = mailSender.getJavaMailProperties();

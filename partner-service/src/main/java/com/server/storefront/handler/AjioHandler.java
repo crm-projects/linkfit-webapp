@@ -2,7 +2,7 @@ package com.server.storefront.handler;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.server.storefront.constants.PartnerConstants;
-import com.server.storefront.dto.ProductDTO;
+import com.server.storefront.dto.ProductLite;
 import com.server.storefront.exception.PartnerException;
 import com.server.storefront.exception.ProductException;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ public class AjioHandler implements BaseHandler {
     private static final String BASE_ENDPOINT = "www.ajio.com";
 
     @Override
-    public ResponseEntity<ProductDTO> getProductDetails(String productURL) throws PartnerException {
+    public ResponseEntity<ProductLite> getProductDetails(String productURL) throws PartnerException {
         String productId = getProductId(productURL);
         try {
             ObjectNode response = restTemplate.getForObject(BASE_ENDPOINT + productId, ObjectNode.class);
             if (Objects.nonNull(response)) {
-                ProductDTO productDto = new ProductDTO();
-                return ResponseEntity.ok(productDto);
+                ProductLite productLite = new ProductLite();
+                return ResponseEntity.ok(productLite);
             } else {
                 log.error(PartnerConstants.NO_INFO);
                 throw new ProductException(PartnerConstants.NULL_OBJECT_RETURNED);

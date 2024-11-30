@@ -12,4 +12,7 @@ public class ProductConstants {
     public static final String AFFILIATE_BASE_URL = "www.linkfit.com/share";
     public static final String SALT = "affiliate_id";
     public static final String NO_VALID_CODE = "No Valid Code found for products";
+
+    public static final char PARAM_VALUE_CHAR = '=';
+    public static final char PARAM_SEPARATOR_CHAR = '/';
 }

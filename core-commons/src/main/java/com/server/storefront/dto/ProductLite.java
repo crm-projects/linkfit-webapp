@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDTO {
+public class ProductLite {
 
     @JsonView(Views.Public.class)
     @JsonProperty("product_id")

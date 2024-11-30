@@ -2,7 +2,6 @@ package com.server.storefront.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.server.storefront.helper.Views;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,7 +43,7 @@ public class Collection {
     @OneToOne
     @JsonView(Views.Public.class)
     @JoinColumn(name = "MEDIA_ID")
-    private MediaData mediaData;
+    private CollectionMedia collectionMedia;
 
     @JsonView(Views.Private.class)
     @ManyToMany(fetch = FetchType.LAZY)

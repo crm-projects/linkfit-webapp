@@ -1,7 +1,7 @@
 package com.server.storefront.service;
 
 import com.server.storefront.constants.CollectionConstants;
-import com.server.storefront.constants.ExceptionConstants;
+import com.server.storefront.constants.CreatorExceptionConstants;
 import com.server.storefront.dto.CollectionLite;
 import com.server.storefront.dto.CreatorProductLite;
 import com.server.storefront.exception.CreatorCollectionException;
@@ -9,7 +9,7 @@ import com.server.storefront.exception.CreatorException;
 import com.server.storefront.model.Collection;
 import com.server.storefront.model.CreatorProduct;
 import com.server.storefront.model.CreatorProfile;
-import com.server.storefront.model.MediaData;
+import com.server.storefront.model.CollectionMedia;
 import com.server.storefront.repository.CollectionRepository;
 import com.server.storefront.repository.CreatorRepository;
 import com.server.storefront.utils.ProductUtil;
@@ -40,7 +40,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
         boolean hasNext;
         try {
             List<CollectionLite> collections = new ArrayList<>();
-            CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
+            CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
             if (Objects.nonNull(creator)) {
                 log.info("Fetching collections for {}", userName);
@@ -59,8 +59,8 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
 //                }
 //                return enrichCreatorCollectionItems(collections, page, hasNext);
             } else {
-                log.error(ExceptionConstants.CREATOR_NOT_FOUND);
-                throw new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND);
+                log.error(CreatorExceptionConstants.CREATOR_NOT_FOUND);
+                throw new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND);
             }
 
         } catch (Exception ex) {
@@ -80,14 +80,14 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
             if (StringUtils.hasLength(mId)) {
                 boolean isActive = tuple.get(CollectionConstants.MEDIA_ACTIVE_IND, Boolean.class);
                 if (isActive) {
-                    MediaData mediaData = new MediaData();
-                    mediaData.setId(mId);
-                    mediaData.setThumbNailURL(tuple.get(CollectionConstants.THUMBNAIL_URL, String.class));
-                    mediaData.setMediaSource(tuple.get(CollectionConstants.MEDIA_SOURCE, String.class));
-                    mediaData.setMediaId(tuple.get(CollectionConstants.SOURCE_MEDIA_ID, String.class));
-                    mediaData.setActiveInd(tuple.get(CollectionConstants.MEDIA_ACTIVE_IND, Boolean.class));
-                    mediaData.setMediaType(tuple.get(CollectionConstants.MEDIA_TYPE, String.class));
-                    collectionDTO.setMediaData(mediaData);
+                    CollectionMedia collectionMedia = new CollectionMedia();
+                    collectionMedia.setId(mId);
+                    collectionMedia.setThumbNailURL(tuple.get(CollectionConstants.THUMBNAIL_URL, String.class));
+                    collectionMedia.setMediaSource(tuple.get(CollectionConstants.MEDIA_SOURCE, String.class));
+                    collectionMedia.setMediaId(tuple.get(CollectionConstants.SOURCE_MEDIA_ID, String.class));
+                    collectionMedia.setActiveInd(tuple.get(CollectionConstants.MEDIA_ACTIVE_IND, Boolean.class));
+                    collectionMedia.setMediaType(tuple.get(CollectionConstants.MEDIA_TYPE, String.class));
+                    collectionDTO.setCollectionMedia(collectionMedia);
                 }
             }
             return collectionDTO;
@@ -121,7 +121,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
                 collectionDTO.setName(collection.getName());
                 collectionDTO.setDescription(collection.getDescription());
                 collectionDTO.setImageURL(collection.getImageURL());
-                collectionDTO.setMediaData(collection.getMediaData());
+                collectionDTO.setCollectionMedia(collection.getCollectionMedia());
 
                 Optional.ofNullable(collection.getCreatorProducts()).ifPresent(creatorProducts -> {
                     Set<CreatorProductLite> products = new HashSet<>();
@@ -181,7 +181,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
         existingCollection.setName(collection.getName());
         existingCollection.setDescription(collection.getDescription());
         existingCollection.setImageURL(collection.getImageURL());
-        existingCollection.setMediaData(collection.getMediaData());
+        existingCollection.setCollectionMedia(collection.getCollectionMedia());
         existingCollection.setCreatorId(collection.getCreatorId());
         Optional.ofNullable(collection.getProducts()).ifPresent(product -> {
             Set<CreatorProduct> products = existingCollection.getCreatorProducts();
@@ -200,6 +200,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
 //                creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
 //                products.add(creatorProductDTO);
 //            }
+
 
 //            collectionDTO.setProducts(products);
         });

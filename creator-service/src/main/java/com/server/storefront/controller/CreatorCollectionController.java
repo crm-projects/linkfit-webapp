@@ -1,11 +1,11 @@
 package com.server.storefront.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.server.storefront.dto.CollectionDTO;
+import com.server.storefront.dto.CollectionLite;
 import com.server.storefront.exception.CreatorCollectionException;
 import com.server.storefront.exception.CreatorProductException;
 import com.server.storefront.helper.Views;
-import com.server.storefront.service.CollectionService;
+import com.server.storefront.service.CreatorCollectionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CreatorCollectionController {
 
-    private final CollectionService collectionService;
+    private final CreatorCollectionService collectionService;
 
     @JsonView(Views.Private.class)
     @GetMapping("/{user_name}/collections")
@@ -39,7 +39,7 @@ public class CreatorCollectionController {
 
     @JsonView(Views.Private.class)
     @GetMapping("/collections/{collection_id}")
-    public ResponseEntity<CollectionDTO> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
+    public ResponseEntity<CollectionLite> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
             throws CreatorCollectionException {
         try {
             return new ResponseEntity<>(collectionService.getCollectionById(collectionId), HttpStatus.OK);
@@ -59,8 +59,8 @@ public class CreatorCollectionController {
     }
 
     @PutMapping(value = "/collections/{collection_id}")
-    public ResponseEntity<CollectionDTO> updateCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, @RequestBody CollectionDTO collection,
-                                                                     HttpServletRequest request) throws CreatorProductException {
+    public ResponseEntity<CollectionLite> updateCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, @RequestBody CollectionLite collection,
+                                                                      HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(collectionService.updateCollectionById(collectionId, collection), HttpStatus.OK);
         } catch (Exception ex) {

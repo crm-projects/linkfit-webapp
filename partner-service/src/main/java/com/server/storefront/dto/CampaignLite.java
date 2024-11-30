@@ -1,15 +1,13 @@
 package com.server.storefront.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-public class CampaignDTO {
+public class CampaignLite {
 
     private String id;
 
@@ -25,7 +23,7 @@ public class CampaignDTO {
 
     private int commissionRateForCreator;
 
-    private CreatorCriteriaDTO creatorCriteria;
+    private CriteriaLite creatorCriteria;
 
     private boolean activeInd;
 

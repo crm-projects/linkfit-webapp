@@ -13,7 +13,6 @@ public class PartnerUtil {
 
     private static final String HOST_REPLACEMENT = "$2";
 
-
     public static String getDomainName(String url) {
         if (!StringUtils.hasLength(url)) {
             return url;

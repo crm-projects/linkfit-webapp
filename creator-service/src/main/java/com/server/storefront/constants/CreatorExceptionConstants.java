@@ -1,8 +1,8 @@
 package com.server.storefront.constants;
 
-public class ExceptionConstants {
+public class CreatorExceptionConstants {
 
-    private ExceptionConstants() {}
+    private CreatorExceptionConstants() {}
 
     public static final String CREATOR_NOT_FOUND = "No Valid Creator Found";
     public static final String INVALID_INPUT = "Invalid Input Provided";

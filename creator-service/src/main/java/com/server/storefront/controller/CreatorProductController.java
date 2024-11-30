@@ -3,6 +3,7 @@ package com.server.storefront.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.server.storefront.dto.CreatorProductLite;
 import com.server.storefront.dto.ProductNodeDTO;
+import com.server.storefront.exception.CreatorProductException;
 import com.server.storefront.helper.Views;
 import com.server.storefront.service.CreatorProductService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +49,7 @@ public class CreatorProductController {
     }
 
     @GetMapping(value = "/products/{pid}")
-    public ResponseEntity<CreatorProductDTO> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
+    public ResponseEntity<CreatorProductLite> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.getProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {

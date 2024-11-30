@@ -3,14 +3,15 @@ package com.server.storefront.service;
 import com.server.storefront.constants.*;
 import com.server.storefront.dto.CollectionLite;
 import com.server.storefront.dto.CreatorProductLite;
-import com.server.storefront.dto.ProductDTO;
+import com.server.storefront.dto.ProductLite;
 import com.server.storefront.dto.ProductNodeDTO;
-import com.server.storefront.exception.CreatorException;
-import com.server.storefront.exception.CreatorProductException;
-import com.server.storefront.exception.ProductException;
+import com.server.storefront.exception.*;
+import com.server.storefront.utils.HandlerUtil;
+import com.server.storefront.handler.BaseHandler;
 import com.server.storefront.model.*;
 import com.server.storefront.model.Collection;
 import com.server.storefront.repository.*;
+import com.server.storefront.utils.PartnerUtil;
 import com.server.storefront.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,7 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class CreatorProductServiceImpl implements CreatorProductService {
 
-    private final PartnerHandlerFactory productHandlerFactory;
-
-    private final PartnerRepository partnerRepository;
+    private final HandlerUtil productHandlerFactory;
 
     private final CreatorRepository creatorRepository;
 
@@ -68,7 +67,7 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     }
 
     private Map<String, Object> checkProfileAndValidateProduct(ProductNodeDTO productNode, String userName) throws CreatorException, InterruptedException {
-        CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND));
+        CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
         Map<String, Object> productResponse = new HashMap<>();
         if (Objects.nonNull(productNode)) {
@@ -135,12 +134,12 @@ public class CreatorProductServiceImpl implements CreatorProductService {
             creatorCollection.setActiveInd(true);
             creatorCollection.setCreatorId(creatorId);
             if (collection.isMediaInd()) {
-                MediaData mediaData = collection.getMediaData();
-                if (!StringUtils.hasText(mediaData.getId())) {
-                    mediaData.setId(UUID.randomUUID().toString());
-                    mediaData = mediaRepository.save(mediaData);
+                CollectionMedia collectionMedia = collection.getCollectionMedia();
+                if (!StringUtils.hasText(collectionMedia.getId())) {
+                    collectionMedia.setId(UUID.randomUUID().toString());
+                    collectionMedia = mediaRepository.save(collectionMedia);
                 }
-                creatorCollection.setMediaData(mediaData);
+                creatorCollection.setCollectionMedia(collectionMedia);
             }
         }));
         return creatorCollection;
@@ -164,46 +163,41 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     private CreatorProduct sanitizeAndProcessCreatorItems(String url, CreatorProfile creator) throws ProductException, HandlerException, PartnerException, CreatorProductException {
         if (!checkIfProductExists(url, creator.getId())) {
-            ProductDTO productDTO = validateHandlerAndFetchProduct(url);
-            Product product = validateProductAndSaveIfAbsent(productDTO, url);
-            return scrubAndSaveCreatorProduct(productDTO, product, url, creator);
+            ProductLite productLite = validateHandlerAndFetchProduct(url);
+            Product product = validateProductAndSaveIfAbsent(productLite, url);
+            return scrubAndSaveCreatorProduct(productLite, product, url, creator);
         } else throw new CreatorProductException("Product Already Exists");
     }
 
-    private ProductDTO validateHandlerAndFetchProduct(String url) throws HandlerException, ProductException, PartnerException {
+    private ProductLite validateHandlerAndFetchProduct(String url) throws HandlerException, ProductException, PartnerException {
         Map<String, Object> handlerParams = getPartnerHandler(url);
         if (!handlerParams.isEmpty()) {
             BaseHandler handler = (BaseHandler) handlerParams.get(PARTNER_HANDLER);
             String partner = (String) handlerParams.get(PARTNER);
             return retrieveProductDetailsFromPartner(handler, url, partner);
         }
-        return new ProductDTO();
+        return new ProductLite();
     }
 
     private Map<String, Object> getPartnerHandler(String url) throws HandlerException {
         String partner = PartnerUtil.getDomainName(url);
-        if (partnerRepository.existsByName(partner)) {
-            BaseHandler handler = productHandlerFactory.getHandler(partner);
-            return Map.of(
-                    PARTNER, partner,
-                    PARTNER_HANDLER, handler
-            );
-        } else {
-            log.info(ProductConstants.NO_VALID_PARTNER);
-        }
-        return Collections.emptyMap();
+        BaseHandler handler = productHandlerFactory.getHandler(partner);
+        return Map.of(
+                PARTNER, partner,
+                PARTNER_HANDLER, handler
+        );
     }
 
-    private ProductDTO retrieveProductDetailsFromPartner(BaseHandler handler, String url, String partner) throws ProductException, PartnerException {
+    private ProductLite retrieveProductDetailsFromPartner(BaseHandler handler, String url, String partner) throws ProductException, PartnerException {
         log.debug("Retrieve Product Details for {} from Partner - {}", url, partner);
-        ResponseEntity<ProductDTO> productDetails = handler.getProductDetails(url);
+        ResponseEntity<ProductLite> productDetails = handler.getProductDetails(url);
         if (Objects.nonNull(productDetails) && Objects.nonNull(productDetails.getBody())) {
             productDetails.getBody().setPartnerName(partner);
             return productDetails.getBody();
-        } else throw new ProductException(ExceptionConstants.PRODUCT_DETAILS_NOT_FOUND);
+        } else throw new ProductException(CreatorExceptionConstants.PRODUCT_DETAILS_NOT_FOUND);
     }
 
-    private CreatorProduct scrubAndSaveCreatorProduct(ProductDTO productDTO, Product product, String url, CreatorProfile creator) throws ProductException {
+    private CreatorProduct scrubAndSaveCreatorProduct(ProductLite productLite, Product product, String url, CreatorProfile creator) throws ProductException {
         Date now = new Date();
         CreatorProduct creatorProduct = new CreatorProduct();
         creatorProduct.setActiveInd(true);
@@ -211,14 +205,14 @@ public class CreatorProductServiceImpl implements CreatorProductService {
         creatorProduct.setCreatedTime(now);
         creatorProduct.setCreator(creator);
         creatorProduct.setProduct(product);
-        creatorProduct.setImageUrl(productDTO.getImageUrl());
-        creatorProduct.setPrice(productDTO.getPrice());
+        creatorProduct.setImageUrl(productLite.getImageUrl());
+        creatorProduct.setPrice(productLite.getPrice());
 
         StringBuilder toHash = new StringBuilder(url);
-        toHash.append(ApplicationConstants.PARAM_SEPARATOR_CHAR).append(ProductConstants.SALT).append(ApplicationConstants.PARAM_VALUE_CHAR).append(creator.getUserName());
+        toHash.append(ProductConstants.PARAM_SEPARATOR_CHAR).append(ProductConstants.SALT).append(ProductConstants.PARAM_VALUE_CHAR).append(creator.getUserName());
         String affiliateCode = ProductUtil.generateUniqueKey(toHash.toString(), false);
         if (StringUtils.hasLength(affiliateCode)) {
-            productDTO.setAffiliateCode(affiliateCode);
+            productLite.setAffiliateCode(affiliateCode);
             setAffiliateDetails(affiliateCode, creatorProduct, now);
         }
 
@@ -232,11 +226,11 @@ public class CreatorProductServiceImpl implements CreatorProductService {
         creatorProduct.setAffiliateExpiresAt(ProductUtil.validUntil(now));
     }
 
-    Product validateProductAndSaveIfAbsent(ProductDTO productDTO, String url) throws ProductException {
-        Product productObj = productRepository.findByProductId(productDTO.getProductId()).orElse(null);
+    Product validateProductAndSaveIfAbsent(ProductLite productLite, String url) throws ProductException {
+        Product productObj = productRepository.findByProductId(productLite.getProductId()).orElse(null);
         if (Objects.isNull(productObj)) {
             Product product = new Product();
-            product.setProductId(productDTO.getProductId());
+            product.setProductId(productLite.getProductId());
             product.setProductURL(url);
             product.setUniqueKey(ProductUtil.generateUniqueKey(url, true));
             return productRepository.save(product);
@@ -289,8 +283,8 @@ public class CreatorProductServiceImpl implements CreatorProductService {
                     products.add(creatorProductDTO);
                 }
             } else {
-                log.error(ExceptionConstants.CREATOR_NOT_FOUND);
-                throw new CreatorException(ExceptionConstants.CREATOR_NOT_FOUND);
+                log.error(CreatorExceptionConstants.CREATOR_NOT_FOUND);
+                throw new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND);
             }
 
             return enrichCreatorProductItems(products, page, hasNext);

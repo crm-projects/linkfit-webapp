@@ -1,6 +1,5 @@
 package com.server.storefront.utils;
 
-import com.server.storefront.constants.ApplicationConstants;
 import com.server.storefront.constants.ProductConstants;
 import com.server.storefront.exception.ProductException;
 
@@ -51,6 +50,8 @@ public class ProductUtil {
     }
 
     public static String getAffiliateUrl(String code) {
-        return ProductConstants.AFFILIATE_BASE_URL + ApplicationConstants.PARAM_SEPARATOR_CHAR + code;
+        return ProductConstants.AFFILIATE_BASE_URL + ProductConstants.PARAM_SEPARATOR_CHAR + code;
     }
+
+
 }

@@ -1,7 +1,6 @@
 package com.server.storefront;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.storefront.constants.ApplicationConstants;
 import com.server.storefront.model.Profile;
 import com.server.storefront.model.CreatorProfile;
 import lombok.SneakyThrows;
@@ -9,11 +8,13 @@ import org.springframework.util.StringUtils;
 
 public class Util {
 
+    public static final String CREATOR_PROFILE = "CREATOR";
+
     public static Profile generateUserProfile(String profile) {
         if (!StringUtils.hasText(profile))
             return null;
         return switch (profile) {
-            case ApplicationConstants.CREATOR_PROFILE -> new CreatorProfile();
+            case CREATOR_PROFILE -> new CreatorProfile();
             default -> null;
         };
     }

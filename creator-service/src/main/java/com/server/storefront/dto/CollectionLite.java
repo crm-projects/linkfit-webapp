@@ -2,7 +2,7 @@ package com.server.storefront.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.server.storefront.model.MediaData;
+import com.server.storefront.model.CollectionMedia;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +33,7 @@ public class CollectionLite {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("media_data")
-    private MediaData mediaData;
+    private CollectionMedia collectionMedia;
 
     @JsonProperty("creatorId")
     private String creatorId;
@@ -43,5 +43,5 @@ public class CollectionLite {
     private int count;
 
     @JsonProperty("product_list")
-    private Set<CreatorProductDTO> products;
+    private Set<CreatorProductLite> products;
 }

@@ -10,3 +10,7 @@ dependencies {
 springBoot {
     mainClass.set('com.server.storefront.StorefrontApplication')
 }
+
+bootJar {
+    archiveFileName = 'linkfit-server-app.jar'  // Name the JAR file as needed
+}

@@ -7,7 +7,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "MEDIA_DATA")
-public class MediaData {
+public class CollectionMedia {
 
     @Id
     @JsonView(Views.Public.class)

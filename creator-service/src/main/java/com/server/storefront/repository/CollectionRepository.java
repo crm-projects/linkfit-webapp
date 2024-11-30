@@ -41,7 +41,7 @@ public interface CollectionRepository extends JpaRepository<Collection, String> 
 //            "GROUP BY c.ID",
 //            nativeQuery = true)
 
-    @Query("SELECT c FROM Collection c LEFT JOIN FETCH c.mediaData LEFT JOIN FETCH c.creatorProducts cp WHERE c.creatorId = :creatorId")
+    @Query("SELECT c FROM Collection c LEFT JOIN FETCH c.collectionMedia LEFT JOIN FETCH c.creatorProducts cp WHERE c.creatorId = :creatorId")
     Optional<Page<Collection>> findAllByCreatorId(@Param("creatorId") String creatorId, Pageable pageable);
 
 
