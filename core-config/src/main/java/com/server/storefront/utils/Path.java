@@ -1,6 +1,5 @@
 package com.server.storefront.utils;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class Path {
@@ -19,24 +18,14 @@ public class Path {
     private static final String SWAGGER_UI = "/swagger-ui/";
 
     public static Set<String> loadWhiteListedPaths() {
-        Set<String> paths = new HashSet<>();
-        paths.add(CHECK_USERNAME);
-        paths.add(GENERATE_OTP);
-        paths.add(LOGIN);
-        paths.add(VALIDATE_AND_SIGN_UP);
-        paths.add(ACTUATOR);
-        paths.add(HEALTH);
 
-        return paths;
-
+        return Set.of(CHECK_USERNAME, GENERATE_OTP, LOGIN,
+                VALIDATE_AND_SIGN_UP, ACTUATOR, HEALTH);
     }
 
     public static Set<String> loadSwaggerPaths() {
-        Set<String> paths = new HashSet<>();
-        paths.add(SWAGGER);
-        paths.add(SWAGGER_UI);
 
-        return paths;
+        return Set.of(SWAGGER, SWAGGER_UI);
     }
 
 }
