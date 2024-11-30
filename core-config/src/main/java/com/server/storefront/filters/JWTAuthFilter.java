@@ -29,17 +29,25 @@ public class JWTAuthFilter implements HandlerInterceptor {
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
         String path = request.getRequestURI().substring(4); //api/
         Set<String> whitelistedPaths = loadWhiteListedPaths();
+        Set<String> swaggerPaths = loadSwaggerPaths();
         Predicate<String> isPathWhitelisted = whitelistedPaths::contains;
 
+        boolean isSwagger = loadSwaggerPaths().stream().anyMatch(path::startsWith);
+
+        if(isSwagger) {
+            log.info("Skipping JWT Validation since condition met for path: {}", path);
+            return true;
+        }
+
         if (isPathWhitelisted.test(path)) {
-            log.info("Skipping JWT Validation since condition met");
+            log.info("Skipping JWT Validation since condition met for path: {}", path);
             return true;
         }
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(BEARER)) {
             // If JWT is missing, block the request
-            log.info("Blocking JWT Validation since condition didn't meet");
+            log.info("Blocking JWT Validation since condition didn't meet for path: {}", path);
 
             /*
              * TODO : Should add HttpStatus.UNAUTHORIZED as status code.
@@ -48,7 +56,7 @@ public class JWTAuthFilter implements HandlerInterceptor {
             return false;
         }
 
-        log.info("Processing JWT Validation since condition didn't meet");
+        log.info("Processing JWT Validation since condition didn't meet for path: {}", path);
         // Validate the JWT token
         String token = authHeader.substring(7);
         try {
@@ -88,5 +96,13 @@ public class JWTAuthFilter implements HandlerInterceptor {
 
         return paths;
 
+    }
+
+    private static Set<String> loadSwaggerPaths() {
+        Set<String> paths = new HashSet<>();
+        paths.add(Path.SWAGGER);
+        paths.add(Path.SWAGGER_UI);
+
+        return paths;
     }
 }

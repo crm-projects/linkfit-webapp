@@ -12,4 +12,7 @@ public class Path {
     public static final String ACTUATOR = "/actuator";
     public static final String HEALTH = "/actuator/health";
 
+    public static final String SWAGGER = "/v3/api-docs";
+    public static final String SWAGGER_UI = "/swagger-ui/";
+
 }
