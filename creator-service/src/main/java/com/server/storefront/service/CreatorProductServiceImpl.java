@@ -4,7 +4,7 @@ import com.server.storefront.constants.*;
 import com.server.storefront.dto.CollectionLite;
 import com.server.storefront.dto.CreatorProductLite;
 import com.server.storefront.dto.ProductLite;
-import com.server.storefront.dto.ProductNodeDTO;
+import com.server.storefront.dto.ProductNode;
 import com.server.storefront.exception.*;
 import com.server.storefront.utils.HandlerUtil;
 import com.server.storefront.handler.BaseHandler;
@@ -57,45 +57,28 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     @Override
     @Transactional
-    public Map<String, Object> addProduct(ProductNodeDTO productNode, String userName) throws ProductException {
+    public Map<String, Object> addProduct(ProductNode productNode, String userName) throws CreatorException, InterruptedException, CreatorProductException {
         log.info("Adding products for {}", userName);
-        try {
-            return checkProfileAndValidateProduct(productNode, userName);
-        } catch (Exception e) {
-            throw new ProductException(e.getMessage());
+
+        if (productNode == null) {
+            return new HashMap<>();
         }
+        return checkProfileAndValidateProduct(productNode, userName);
     }
 
-    private Map<String, Object> checkProfileAndValidateProduct(ProductNodeDTO productNode, String userName) throws CreatorException, InterruptedException {
-        CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
+    private Map<String, Object> checkProfileAndValidateProduct(ProductNode productNode, String userName) throws CreatorException, CreatorProductException {
 
-        Map<String, Object> productResponse = new HashMap<>();
-        if (Objects.nonNull(productNode)) {
-            CompletableFuture<Set<CreatorProduct>> validateProductAndSaveIfAbsent = CompletableFuture.supplyAsync(() -> {
-                try {
-                    return processProductItems(productNode.getProducts(), productNode.isCollectionInd(), creator);
-                } catch (CreatorProductException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            CompletableFuture<Collection> validateCollection = CompletableFuture.supplyAsync(() -> {
-                if (productNode.isCollectionInd())
-                    return scrubCollectionItems(productNode.getCollection(), creator.getId());
-                return null;
-            });
-            CompletableFuture<Optional<Map<String, Object>>> response = validateProductAndSaveIfAbsent.thenCombine(validateCollection, this::preparePostProcessing);
+        CreatorProfile creator = creatorRepository.findByUserName(userName.strip())
+                .orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
-            try {
-                if(response.get().isPresent()) {
-                    productResponse = response.get().get();
-                }
+        Set<CreatorProduct> creatorProducts = processProductItems(productNode.getProducts(), productNode.isCollectionInd(), creator);
 
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new InterruptedException("Error while processing creator products and collection");
-            }
-        }
-        return productResponse;
+        Collection collection = productNode.isCollectionInd() ? scrubCollectionItems(productNode.getCollection(), creator.getId()) : null;
+
+        return Optional.of(preparePostProcessing(creatorProducts, collection)).get().orElse(new HashMap<>());
+
     }
+
 
     private Optional<Map<String, Object>> preparePostProcessing(Set<CreatorProduct> products, Collection collection) {
         if (Objects.nonNull(collection)) {
@@ -119,15 +102,19 @@ public class CreatorProductServiceImpl implements CreatorProductService {
             productList.add(creatorProductDTO);
         }
 
-        return Optional.of(Map.of(
-                ProductConstants.PRODUCTS, productList,
-                CollectionConstants.COLLECTION, collection
-        ));
+        Map<String, Object> productMap = new HashMap<>();
+        productMap.put(ProductConstants.PRODUCTS, productList);
+
+        if (collection != null) {
+            productMap.put(CollectionConstants.COLLECTION, collection);
+        }
+
+        return Optional.of(productMap);
     }
 
-    private Collection scrubCollectionItems(CollectionLite CollectionLite, String creatorId) {
+    private Collection scrubCollectionItems(CollectionLite collectionLite, String creatorId) {
         Collection creatorCollection = new Collection();
-        Optional.ofNullable(CollectionLite).ifPresent((collection -> {
+        Optional.ofNullable(collectionLite).ifPresent((collection -> {
             creatorCollection.setName(collection.getName());
             creatorCollection.setDescription(collection.getDescription());
             creatorCollection.setImageURL(collection.getImageURL());
@@ -146,9 +133,14 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     }
 
     private Set<CreatorProduct> processProductItems(List<String> products, boolean collectionInd, CreatorProfile creator) throws CreatorProductException {
-        if (CollectionUtils.isEmpty(products)) return Collections.emptySet();
+        if (CollectionUtils.isEmpty(products)) {
+            throw new CreatorProductException("Empty Product list provided. Please try again");
+        }
 
-        if(!collectionInd && products.size() > BASE_CONDITION ) { throw new CreatorProductException("Multiple Products cannot be added without a Collection");}
+        if (!collectionInd && products.size() > BASE_CONDITION) {
+            throw new CreatorProductException("Multiple Products cannot be added without a Collection");
+        }
+
         Set<CreatorProduct> productSet = new HashSet<>();
         for (String url : products) {
             try {
@@ -156,6 +148,7 @@ public class CreatorProductServiceImpl implements CreatorProductService {
                 productSet.add(creatorProduct);
             } catch (ProductException | HandlerException | PartnerException | CreatorProductException e) {
                 log.error("Error while processing creator product", e);
+                throw new CreatorProductException(e.getMessage());
             }
         }
         return productSet;
@@ -190,11 +183,14 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     private ProductLite retrieveProductDetailsFromPartner(BaseHandler handler, String url, String partner) throws ProductException, PartnerException {
         log.debug("Retrieve Product Details for {} from Partner - {}", url, partner);
+
         ResponseEntity<ProductLite> productDetails = handler.getProductDetails(url);
-        if (Objects.nonNull(productDetails) && Objects.nonNull(productDetails.getBody())) {
-            productDetails.getBody().setPartnerName(partner);
-            return productDetails.getBody();
-        } else throw new ProductException(CreatorExceptionConstants.PRODUCT_DETAILS_NOT_FOUND);
+        if (productDetails.getBody() == null) {
+            throw new ProductException(CreatorExceptionConstants.PRODUCT_DETAILS_NOT_FOUND);
+        }
+
+        productDetails.getBody().setPartnerName(partner);
+        return productDetails.getBody();
     }
 
     private CreatorProduct scrubAndSaveCreatorProduct(ProductLite productLite, Product product, String url, CreatorProfile creator) throws ProductException {
@@ -209,7 +205,10 @@ public class CreatorProductServiceImpl implements CreatorProductService {
         creatorProduct.setPrice(productLite.getPrice());
 
         StringBuilder toHash = new StringBuilder(url);
-        toHash.append(ProductConstants.PARAM_SEPARATOR_CHAR).append(ProductConstants.SALT).append(ProductConstants.PARAM_VALUE_CHAR).append(creator.getUserName());
+        toHash.append(ProductConstants.PARAM_SEPARATOR_CHAR)
+                .append(ProductConstants.SALT)
+                .append(ProductConstants.PARAM_VALUE_CHAR)
+                .append(creator.getUserName());
         String affiliateCode = ProductUtil.generateUniqueKey(toHash.toString(), false);
         if (StringUtils.hasLength(affiliateCode)) {
             productLite.setAffiliateCode(affiliateCode);
@@ -227,24 +226,27 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     }
 
     Product validateProductAndSaveIfAbsent(ProductLite productLite, String url) throws ProductException {
+
         Product productObj = productRepository.findByProductId(productLite.getProductId()).orElse(null);
-        if (Objects.isNull(productObj)) {
-            Product product = new Product();
-            product.setProductId(productLite.getProductId());
-            product.setProductURL(url);
-            product.setUniqueKey(ProductUtil.generateUniqueKey(url, true));
-            return productRepository.save(product);
+
+        if (productObj != null) {
+            return productObj;
         }
-        return productObj;
+
+        Product product = new Product();
+        product.setProductId(productLite.getProductId());
+        product.setProductURL(url);
+        product.setUniqueKey(ProductUtil.generateUniqueKey(url, true));
+        return productRepository.save(product);
     }
 
     private boolean checkIfProductExists(String url, String creatorId) throws ProductException {
         log.debug("Check if Product {} already Exists", url);
         String shortURL = ProductUtil.generateUniqueKey(url, true);
         Product product = productRepository.findByUniqueKey(shortURL).orElse(null);
-        if (Objects.nonNull(product)) {
-            Optional<CreatorProduct> existingProduct = creatorProductRepository.findByProductId(product.getId(), creatorId);
-            if (Objects.nonNull(existingProduct)) {
+        if (product != null) {
+            CreatorProduct existingProduct = creatorProductRepository.findByProductId(product.getId(), creatorId).orElse(null);
+            if (existingProduct != null) {
                 log.info("Product Already Exists");
                 return true;
             }

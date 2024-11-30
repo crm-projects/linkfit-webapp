@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ProductNodeDTO {
+public class ProductNode {
 
     @JsonProperty("urls")
     private List<String> products;
