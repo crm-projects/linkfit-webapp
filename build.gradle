@@ -47,8 +47,8 @@ subprojects {
 
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-        implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.529')
-        implementation 'com.amazonaws:aws-java-sdk-s3'
+        implementation platform("software.amazon.awssdk:bom:2.27.21")
+        implementation 'software.amazon.awssdk:s3'
 
         implementation 'org.springframework:spring-webflux:6.1.11'
         testImplementation platform('org.junit:junit-bom:5.9.1')

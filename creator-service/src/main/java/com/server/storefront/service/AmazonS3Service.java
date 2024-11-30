@@ -1,15 +1,12 @@
 package com.server.storefront.service;
 
-import com.amazonaws.services.s3.model.Bucket;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.List;
+import java.io.IOException;
 
 public interface AmazonS3Service {
 
-    List<Bucket> getBucketList();
-
     boolean validateBucket(String bucketName);
 
-    void upload(String bucketName, String key, File file);
+    String upload(MultipartFile file, String userName) throws IOException;
 }
