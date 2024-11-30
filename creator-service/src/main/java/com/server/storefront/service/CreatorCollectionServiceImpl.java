@@ -6,6 +6,7 @@ import com.server.storefront.dto.CollectionLite;
 import com.server.storefront.dto.CreatorProductLite;
 import com.server.storefront.exception.CreatorCollectionException;
 import com.server.storefront.exception.CreatorException;
+import com.server.storefront.exception.CreatorProductException;
 import com.server.storefront.model.Collection;
 import com.server.storefront.model.CreatorProduct;
 import com.server.storefront.model.CreatorProfile;
@@ -36,75 +37,59 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Object> getAllCollectionsByCreator(String userName, int page, int limit) throws CreatorCollectionException {
-        boolean hasNext;
+    public Map<String, Object> getAllCollectionsByCreator(String userName, int startIndex, int limit) throws CreatorCollectionException {
         try {
             List<CollectionLite> collections = new ArrayList<>();
-            CreatorProfile creator = creatorRepository.findByUserName(userName.strip()).orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
+            CreatorProfile creator = creatorRepository.findByUserName(userName.strip())
+                    .orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
-            if (Objects.nonNull(creator)) {
-                log.info("Fetching collections for {}", userName);
-                PageRequest pageRequest = PageRequest.of(page, limit);
-                Optional<Page<Collection>> data = collectionRepository.findAllByCreatorId(creator.getId(), pageRequest);
-                data.ifPresent(Slice::getContent);
-                return new HashMap<>();
-////                Page<Tuple> creatorCollections = collectionRepository.findAllByCreatorId(creator.getId(), pageRequest);
-//                hasNext = (creatorCollections.getTotalPages() - 1) - page > 0;
-//                if (creatorCollections.isEmpty())
-//                    throw new CreatorCollectionException(CollectionConstants.NO_VALID_COLLECTIONS);
-//
-//                for (Tuple tuple : creatorCollections) {
-//                    log.info("Scrubbing creator collections for Creator: {}", userName);
-//                    Optional.ofNullable(scrubCreatorCollectionItems(tuple)).ifPresent(collections::add);
-//                }
-//                return enrichCreatorCollectionItems(collections, page, hasNext);
-            } else {
-                log.error(CreatorExceptionConstants.CREATOR_NOT_FOUND);
-                throw new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND);
+            log.info("Fetching collections for {}", userName);
+
+            /* TODO : Cache this result as product count won't increase at once */
+            int totalCount = collectionRepository.fetchCount(creator.getId());
+            
+            List<Collection> collectionList = collectionRepository.findAllByCreatorId(creator.getId(), startIndex, limit);
+            boolean hasNext = startIndex + collectionList.size() < totalCount;
+
+            if (collectionList.isEmpty()) {
+                throw new CreatorProductException(CollectionConstants.NO_VALID_COLLECTIONS);
             }
+            
+            collectionList.forEach(collection -> {
+                CollectionLite collectionDTO = new CollectionLite();
+                collectionDTO.setId(collection.getId());
+                collectionDTO.setName(collection.getName());
+                collectionDTO.setDescription(collection.getDescription());
+                collectionDTO.setImageURL(collection.getImageURL());
 
+                if(collection.getCollectionMedia() != null) {
+                    CollectionMedia collectionMedia = new CollectionMedia();
+                    collectionMedia.setId(collection.getCollectionMedia().getId());
+                    collectionMedia.setThumbNailURL(collection.getCollectionMedia().getThumbNailURL());
+                    collectionMedia.setMediaSource(collection.getCollectionMedia().getMediaSource());
+                    collectionMedia.setMediaId(collection.getCollectionMedia().getMediaId());
+                    collectionMedia.setActiveInd(collection.getCollectionMedia().isActiveInd());
+                    collectionMedia.setMediaType(collection.getCollectionMedia().getMediaType());
+                    collectionDTO.setCollectionMedia(collectionMedia);
+                }
+
+                collections.add(collectionDTO);
+            });
+
+            return enrichCreatorCollectionItems(collections, totalCount, hasNext);
         } catch (Exception ex) {
             throw new CreatorCollectionException(ex.getMessage());
         }
     }
 
-    private CollectionLite scrubCreatorCollectionItems(Tuple tuple) {
-        if (Boolean.TRUE.equals(tuple.get(CollectionConstants.ACTIVE_IND, Boolean.class))) {
-            CollectionLite collectionDTO = new CollectionLite();
-            collectionDTO.setId(tuple.get(CollectionConstants.ID, String.class));
-            collectionDTO.setName(tuple.get(CollectionConstants.NAME, String.class));
-            collectionDTO.setDescription(tuple.get(CollectionConstants.DESCRIPTION, String.class));
-            collectionDTO.setImageURL(tuple.get(CollectionConstants.IMAGE_URL, String.class));
-
-            String mId = tuple.get(CollectionConstants.MEDIA_ID, String.class);
-            if (StringUtils.hasLength(mId)) {
-                boolean isActive = tuple.get(CollectionConstants.MEDIA_ACTIVE_IND, Boolean.class);
-                if (isActive) {
-                    CollectionMedia collectionMedia = new CollectionMedia();
-                    collectionMedia.setId(mId);
-                    collectionMedia.setThumbNailURL(tuple.get(CollectionConstants.THUMBNAIL_URL, String.class));
-                    collectionMedia.setMediaSource(tuple.get(CollectionConstants.MEDIA_SOURCE, String.class));
-                    collectionMedia.setMediaId(tuple.get(CollectionConstants.SOURCE_MEDIA_ID, String.class));
-                    collectionMedia.setActiveInd(tuple.get(CollectionConstants.MEDIA_ACTIVE_IND, Boolean.class));
-                    collectionMedia.setMediaType(tuple.get(CollectionConstants.MEDIA_TYPE, String.class));
-                    collectionDTO.setCollectionMedia(collectionMedia);
-                }
-            }
-            return collectionDTO;
-        }
-        return null;
-    }
-
-    private Map<String, Object> enrichCreatorCollectionItems(List<CollectionLite> collections, int page, boolean hasNext) {
-        Map<String, Object> pageObject = new HashMap<>();
-        pageObject.put(CollectionConstants.CURRENT_PAGE, page);
-        pageObject.put(CollectionConstants.HAS_NEXT_PAGE, hasNext);
-
-        Map<String, Object> collectionList = new HashMap<>();
-        collectionList.put(CollectionConstants.COLLECTIONS, collections);
-        collectionList.put(CollectionConstants.PAGING, pageObject);
-
-        return collectionList;
+    private Map<String, Object> enrichCreatorCollectionItems(List<CollectionLite> collections, int totalCount, boolean hasNext) {
+        return Map.of(
+                CollectionConstants.COLLECTIONS, collections,
+                CollectionConstants.PAGING, Map.of(
+                        CollectionConstants.TOTAL_COUNT, totalCount,
+                        CollectionConstants.HAS_NEXT_PAGE, hasNext
+                )
+        );
     }
 
     @Override

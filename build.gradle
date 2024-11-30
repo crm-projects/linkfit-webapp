@@ -47,6 +47,8 @@ subprojects {
 
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+        implementation 'com.github.jsqlparser:jsqlparser:4.9'
+
         implementation platform("software.amazon.awssdk:bom:2.27.21")
         implementation 'software.amazon.awssdk:s3'
 

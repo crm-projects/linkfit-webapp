@@ -24,4 +24,5 @@ public class CollectionConstants {
     public static final String HAS_NEXT_PAGE = "has_next";
     public static final String COLLECTIONS = "collection";
     public static final String PAGING = "paging";
+    public static final String TOTAL_COUNT = "total_count";
 }

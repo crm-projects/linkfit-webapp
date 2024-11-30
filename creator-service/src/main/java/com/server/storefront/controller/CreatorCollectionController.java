@@ -17,20 +17,20 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/collections")
 @RequiredArgsConstructor
 public class CreatorCollectionController {
 
     private final CreatorCollectionService collectionService;
 
     @JsonView(Views.Private.class)
-    @GetMapping("/{user_name}/collections")
+    @GetMapping("/{user_name}")
     public ResponseEntity<Map<String, Object>> getAllCollectionsByCreator(@PathVariable("user_name") String creatorId,
-                                                                          @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                          @RequestParam(value = "startIndex", defaultValue = "0") int startIndex,
                                                                           @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                                           HttpServletRequest request) throws CreatorCollectionException {
         try {
-            return new ResponseEntity<>(collectionService.getAllCollectionsByCreator(creatorId, page, limit), HttpStatus.OK);
+            return new ResponseEntity<>(collectionService.getAllCollectionsByCreator(creatorId, startIndex, limit), HttpStatus.OK);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new CreatorCollectionException(ex.getMessage());
@@ -38,7 +38,7 @@ public class CreatorCollectionController {
     }
 
     @JsonView(Views.Private.class)
-    @GetMapping("/collections/{collection_id}")
+    @GetMapping("/{collection_id}")
     public ResponseEntity<CollectionLite> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
             throws CreatorCollectionException {
         try {
@@ -49,7 +49,7 @@ public class CreatorCollectionController {
         }
     }
 
-    @DeleteMapping(value = "/collections/{collection_id}")
+    @DeleteMapping(value = "/{collection_id}")
     public ResponseEntity<Boolean> deleteCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(collectionService.deleteCollectionById(collectionId), HttpStatus.OK);
@@ -58,7 +58,7 @@ public class CreatorCollectionController {
         }
     }
 
-    @PutMapping(value = "/collections/{collection_id}")
+    @PutMapping(value = "/{collection_id}")
     public ResponseEntity<CollectionLite> updateCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, @RequestBody CollectionLite collection,
                                                                       HttpServletRequest request) throws CreatorProductException {
         try {

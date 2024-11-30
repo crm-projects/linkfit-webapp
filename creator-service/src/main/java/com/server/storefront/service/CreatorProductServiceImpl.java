@@ -254,7 +254,6 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getAllProductsByCreator(String userName, int startIndex, int limit) throws CreatorProductException {
-
         try {
             List<CreatorProductLite> products = new ArrayList<>();
             CreatorProfile creator = creatorRepository.findByUserName(userName.strip())
