@@ -15,8 +15,6 @@ import com.server.storefront.utils.PartnerUtil;
 import com.server.storefront.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +44,7 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     private static final String PARTNER_HANDLER = "handler";
     private static final String PARTNER = "partner";
-    private static final String CURRENT_PAGE = "current_page";
+    private static final String TOTAL_COUNT = "total_records";
     private static final String HAS_NEXT = "has_next";
     private static final String PAGING = "paging";
     private static final String DATA = "data";
@@ -256,19 +254,24 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getAllProductsByCreator(String userName, int startIndex, int limit) throws CreatorProductException {
-        boolean hasNext;
+
         try {
             List<CreatorProductLite> products = new ArrayList<>();
             CreatorProfile creator = creatorRepository.findByUserName(userName.strip())
                     .orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
             log.info("Fetching products for {}", creator.getUserName());
-            PageRequest pageRequest = PageRequest.of(startIndex / limit, limit);
-            Page<CreatorProduct> creatorProducts = creatorProductRepository.findAllByCreatorId(creator.getUserName(), pageRequest);
-            hasNext = (creatorProducts.getTotalPages() - 1) - startIndex > 0;
+
+            /* TODO : Cache this result as product count won't increase at once */
+            int totalCount = creatorProductRepository.fetchCount(creator.getId());
+
+            List<CreatorProduct> creatorProducts = creatorProductRepository.findAllByCreatorId(creator.getId(), startIndex, limit);
+            boolean hasNext = startIndex + creatorProducts.size() < totalCount;
+
             if (creatorProducts.isEmpty()) {
                 throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
             }
+
             creatorProducts.forEach(product -> {
                 CreatorProductLite creatorProductDTO = new CreatorProductLite();
                 creatorProductDTO.setId(product.getId());
@@ -284,18 +287,18 @@ public class CreatorProductServiceImpl implements CreatorProductService {
                 products.add(creatorProductDTO);
             });
 
-            return enrichCreatorProductItems(products, startIndex, hasNext);
+            return enrichCreatorProductItems(products, totalCount, hasNext);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());
         }
     }
 
-    private Map<String, Object> enrichCreatorProductItems(List<CreatorProductLite> products, int page, boolean hasNext) {
+    private Map<String, Object> enrichCreatorProductItems(List<CreatorProductLite> products, int totalCount, boolean hasNext) {
         return Map.of(
                 DATA, products,
                 PAGING, Map.of(
-                        CURRENT_PAGE, page,
+                        TOTAL_COUNT, totalCount,
                         HAS_NEXT, hasNext
                 )
         );
