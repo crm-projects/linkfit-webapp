@@ -21,13 +21,13 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/products")
 public class CreatorProductController {
 
     private final CreatorProductService productService;
 
     @JsonView(Views.Public.class)
-    @PostMapping("/{user_name}/products/add")
+    @PostMapping("/{user_name}/add")
     public ResponseEntity<Map<String, Object>> addProducts(@PathVariable("user_name") String userName,
                                                            @RequestBody ProductNode productNode,
                                                            HttpServletRequest request) throws CreatorProductException {
@@ -41,7 +41,7 @@ public class CreatorProductController {
         }
     }
 
-    @GetMapping(value = "/{user_name}/products")
+    @GetMapping(value = "/{user_name}")
     public ResponseEntity<Map<String, Object>> getAllProductsByCreator(@PathVariable("user_name") String userName,
                                                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                                                        @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -53,7 +53,7 @@ public class CreatorProductController {
         }
     }
 
-    @GetMapping(value = "/products/{pid}")
+    @GetMapping(value = "/{pid}")
     public ResponseEntity<CreatorProductLite> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.getProductById(productId), HttpStatus.OK);
@@ -62,21 +62,11 @@ public class CreatorProductController {
         }
     }
 
-    @DeleteMapping(value = "/products/{pid}/delete")
+    @DeleteMapping(value = "/{pid}/delete")
     public ResponseEntity<Boolean> deleteCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.deleteProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {
-            throw new CreatorProductException(ex.getMessage());
-        }
-    }
-
-    @GetMapping(value = "/share/{code}")
-    public RedirectView getLongUrl(@PathVariable("code") String code, HttpServletRequest request) throws CreatorProductException {
-        try {
-            return productService.getLongUrlByCode(code);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());
         }
     }
