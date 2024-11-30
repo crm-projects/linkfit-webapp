@@ -26,8 +26,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -75,12 +73,12 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
         Collection collection = productNode.isCollectionInd() ? scrubCollectionItems(productNode.getCollection(), creator.getId()) : null;
 
-        return Optional.of(preparePostProcessing(creatorProducts, collection)).get().orElse(new HashMap<>());
+        return Optional.of(postProcessing(creatorProducts, collection)).get().orElse(new HashMap<>());
 
     }
 
 
-    private Optional<Map<String, Object>> preparePostProcessing(Set<CreatorProduct> products, Collection collection) {
+    private Optional<Map<String, Object>> postProcessing(Set<CreatorProduct> products, Collection collection) {
         if (Objects.nonNull(collection)) {
             collection.setCreatorProducts(products);
             collectionRepository.save(collection);
@@ -257,39 +255,36 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Object> getAllProductsByCreator(String userName, int page, int limit) throws CreatorProductException {
+    public Map<String, Object> getAllProductsByCreator(String userName, int startIndex, int limit) throws CreatorProductException {
         boolean hasNext;
         try {
             List<CreatorProductLite> products = new ArrayList<>();
-            CreatorProfile creator = creatorRepository.findById(userName).orElse(null);
-            if (Objects.nonNull(creator)) {
-                log.info("Fetching products for {}", creator.getUserName());
-                PageRequest pageRequest = PageRequest.of(page, limit);
-                Page<CreatorProduct> creatorProducts = creatorProductRepository.findAllByCreatorId(creator.getUserName(), pageRequest);
-                hasNext = (creatorProducts.getTotalPages() - 1) - page > 0;
-                if (creatorProducts.isEmpty()) {
-                    throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
-                }
-                for (CreatorProduct p : creatorProducts) {
-                    CreatorProductLite creatorProductDTO = new CreatorProductLite();
-                    creatorProductDTO.setId(p.getId());
-                    creatorProductDTO.setPid(p.getProduct().getProductId());
-                    creatorProductDTO.setImageURL(p.getImageUrl());
-                    creatorProductDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(p.getAffiliateCode()));
-                    creatorProductDTO.setPrice(p.getPrice());
-                    creatorProductDTO.setTitle(p.getTitle());
-                    creatorProductDTO.setCreatedTime(p.getCreatedTime());
-                    creatorProductDTO.setCurrency(p.getCurrency());
-                    creatorProductDTO.setCategory(p.getCategory());
-                    creatorProductDTO.setExpiryDate(p.getAffiliateExpiresAt());
-                    products.add(creatorProductDTO);
-                }
-            } else {
-                log.error(CreatorExceptionConstants.CREATOR_NOT_FOUND);
-                throw new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND);
-            }
+            CreatorProfile creator = creatorRepository.findByUserName(userName.strip())
+                    .orElseThrow(() -> new CreatorException(CreatorExceptionConstants.CREATOR_NOT_FOUND));
 
-            return enrichCreatorProductItems(products, page, hasNext);
+            log.info("Fetching products for {}", creator.getUserName());
+            PageRequest pageRequest = PageRequest.of(startIndex / limit, limit);
+            Page<CreatorProduct> creatorProducts = creatorProductRepository.findAllByCreatorId(creator.getUserName(), pageRequest);
+            hasNext = (creatorProducts.getTotalPages() - 1) - startIndex > 0;
+            if (creatorProducts.isEmpty()) {
+                throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
+            }
+            creatorProducts.forEach(product -> {
+                CreatorProductLite creatorProductDTO = new CreatorProductLite();
+                creatorProductDTO.setId(product.getId());
+                creatorProductDTO.setPid(product.getProduct().getProductId());
+                creatorProductDTO.setImageURL(product.getImageUrl());
+                creatorProductDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(product.getAffiliateCode()));
+                creatorProductDTO.setPrice(product.getPrice());
+                creatorProductDTO.setTitle(product.getTitle());
+                creatorProductDTO.setCreatedTime(product.getCreatedTime());
+                creatorProductDTO.setCurrency(product.getCurrency());
+                creatorProductDTO.setCategory(product.getCategory());
+                creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
+                products.add(creatorProductDTO);
+            });
+
+            return enrichCreatorProductItems(products, startIndex, hasNext);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());
@@ -309,27 +304,22 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     @Override
     @Transactional(readOnly = true)
     public CreatorProductLite getProductById(String productId) throws CreatorProductException, CreatorException {
-        if (!StringUtils.hasLength(productId)) {
-            throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
-        }
-        CreatorProduct product = creatorProductRepository.findById(productId).orElse(null);
-        if (Objects.nonNull(product)) {
-            CreatorProductLite creatorProductDTO = new CreatorProductLite();
-            creatorProductDTO.setId(product.getId());
-            creatorProductDTO.setPid(product.getProduct().getProductId());
-            creatorProductDTO.setPrice(product.getPrice());
-            creatorProductDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(product.getAffiliateCode()));
-            creatorProductDTO.setTitle(product.getTitle());
-            creatorProductDTO.setImageURL(product.getImageUrl());
-            creatorProductDTO.setCreatedTime(product.getCreatedTime());
-            creatorProductDTO.setCurrency(product.getCurrency());
-            creatorProductDTO.setCategory(product.getCategory());
-            creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
-            return creatorProductDTO;
-        } else {
-            log.error(ProductConstants.NO_VALID_PRODUCTS);
-            throw new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS);
-        }
+
+        CreatorProduct product = creatorProductRepository.findById(productId)
+                .orElseThrow(() -> new CreatorProductException(ProductConstants.NO_VALID_PRODUCTS));
+
+        CreatorProductLite creatorProductDTO = new CreatorProductLite();
+        creatorProductDTO.setId(product.getId());
+        creatorProductDTO.setPid(product.getProduct().getProductId());
+        creatorProductDTO.setPrice(product.getPrice());
+        creatorProductDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(product.getAffiliateCode()));
+        creatorProductDTO.setTitle(product.getTitle());
+        creatorProductDTO.setImageURL(product.getImageUrl());
+        creatorProductDTO.setCreatedTime(product.getCreatedTime());
+        creatorProductDTO.setCurrency(product.getCurrency());
+        creatorProductDTO.setCategory(product.getCategory());
+        creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
+        return creatorProductDTO;
     }
 
     @Override

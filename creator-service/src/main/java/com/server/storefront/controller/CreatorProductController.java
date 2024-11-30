@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
 
@@ -43,19 +42,22 @@ public class CreatorProductController {
 
     @GetMapping(value = "/{user_name}")
     public ResponseEntity<Map<String, Object>> getAllProductsByCreator(@PathVariable("user_name") String userName,
-                                                                       @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                       @RequestParam(value = "startIndex", defaultValue = "0") int startIndex,
                                                                        @RequestParam(value = "limit", defaultValue = "10") int limit,
                                                                        HttpServletRequest request) throws CreatorProductException {
         try {
-            return new ResponseEntity<>(productService.getAllProductsByCreator(userName, page, limit), HttpStatus.OK);
+            return new ResponseEntity<>(productService.getAllProductsByCreator(userName, startIndex, limit), HttpStatus.OK);
         } catch (Exception ex) {
             throw new CreatorProductException(ex.getMessage());
         }
     }
 
-    @GetMapping(value = "/{pid}")
+    @GetMapping(value = "/product/{pid}")
     public ResponseEntity<CreatorProductLite> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
+            if (!StringUtils.hasLength(productId)) {
+                throw new CreatorProductException("Invalid product id provided. Please try again");
+            }
             return new ResponseEntity<>(productService.getProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {
             throw new CreatorProductException(ex.getMessage());
