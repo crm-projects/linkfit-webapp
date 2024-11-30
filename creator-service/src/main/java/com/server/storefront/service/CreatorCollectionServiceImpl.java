@@ -14,12 +14,8 @@ import com.server.storefront.model.CollectionMedia;
 import com.server.storefront.repository.CollectionRepository;
 import com.server.storefront.repository.CreatorRepository;
 import com.server.storefront.utils.ProductUtil;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -62,7 +58,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
                 collectionDTO.setDescription(collection.getDescription());
                 collectionDTO.setImageURL(collection.getImageURL());
 
-                if(collection.getCollectionMedia() != null) {
+                if (collection.getCollectionMedia() != null) {
                     CollectionMedia collectionMedia = new CollectionMedia();
                     collectionMedia.setId(collection.getCollectionMedia().getId());
                     collectionMedia.setThumbNailURL(collection.getCollectionMedia().getThumbNailURL());
@@ -156,44 +152,23 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
     @Override
     @Transactional
     public CollectionLite updateCollectionById(String collectionId, CollectionLite collection) throws CreatorCollectionException {
+
         if (!StringUtils.hasLength(collectionId)) {
             throw new CreatorCollectionException(CollectionConstants.NO_VALID_COLLECTIONS);
         }
 
-        if(Objects.isNull(collection)) throw new CreatorCollectionException("");
+        if (collection != null) throw new CreatorCollectionException(CollectionConstants.NO_VALID_COLLECTIONS);
 
-        Collection existingCollection = collectionRepository.findById(collectionId).orElseThrow(() -> new CreatorCollectionException(""));
+        Collection existingCollection = collectionRepository.findById(collectionId)
+                .orElseThrow(() -> new CreatorCollectionException(CollectionConstants.NO_VALID_COLLECTIONS));
+
         existingCollection.setName(collection.getName());
         existingCollection.setDescription(collection.getDescription());
         existingCollection.setImageURL(collection.getImageURL());
         existingCollection.setCollectionMedia(collection.getCollectionMedia());
         existingCollection.setCreatorId(collection.getCreatorId());
-        Optional.ofNullable(collection.getProducts()).ifPresent(product -> {
-            Set<CreatorProduct> products = existingCollection.getCreatorProducts();
-//            for (CreatorProductDTO productDto : product) {
-//                CreatorProductDTO creatorProductDTO = new CreatorProductDTO();
-//                creatorProductDTO.setId(product.getId());
-//                creatorProductDTO.setTitle(product.getTitle());
-//                creatorProductDTO.setImageURL(product.getImageUrl());
-//                creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
-//                creatorProductDTO.setPrice(product.getPrice());
-//                creatorProductDTO.setCreatedTime(product.getCreatedTime());
-//                creatorProductDTO.setAffiliateUrl(ProductUtil.getAffiliateUrl(product.getAffiliateCode()));
-//                creatorProductDTO.setCreatedTime(product.getCreatedTime());
-//                creatorProductDTO.setCurrency(product.getCurrency());
-//                creatorProductDTO.setCategory(product.getCategory());
-//                creatorProductDTO.setExpiryDate(product.getAffiliateExpiresAt());
-//                products.add(creatorProductDTO);
-//            }
 
-
-//            collectionDTO.setProducts(products);
-        });
-
-
-        /**
-         * To add update logic based on input payload
-         */
-        return null;
+        collectionRepository.save(existingCollection);
+        return collection;
     }
 }

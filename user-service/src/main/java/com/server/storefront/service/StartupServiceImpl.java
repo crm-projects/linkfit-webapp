@@ -6,6 +6,7 @@ import com.server.storefront.dto.BaseProfile;
 import com.server.storefront.dto.CreatorProfile;
 import com.server.storefront.dto.Credentials;
 import com.server.storefront.exception.StartupException;
+import com.server.storefront.repository.CreatorProfileRepository;
 import com.server.storefront.repository.RedisRepository;
 import com.server.storefront.util.JWTUtil;
 import com.server.storefront.util.OTPUtil;
@@ -43,6 +44,8 @@ public class StartupServiceImpl implements StartupService {
     Predicate<String> isBasicProfile = p -> p.equals(USER);
 
     private final RedisRepository redisRepository;
+
+    private final CreatorProfileRepository creatorRepository;
 
     @Override
     public boolean generateOtpByEmail(Credentials credentials) throws StartupException {
@@ -85,10 +88,9 @@ public class StartupServiceImpl implements StartupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean validateUsername(String userName) {
-        // TODO : Write logic to query Elasticsearch for the data rather than Postgres.
-
-        return false;
+        return creatorRepository.existsByUserName(userName);
     }
 
     @Override
