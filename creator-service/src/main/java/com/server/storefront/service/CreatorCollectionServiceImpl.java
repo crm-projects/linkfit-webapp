@@ -16,6 +16,7 @@ import com.server.storefront.repository.CreatorRepository;
 import com.server.storefront.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -42,7 +43,7 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
             log.info("Fetching collections for {}", userName);
 
             /* TODO : Cache this result as product count won't increase at once */
-            int totalCount = collectionRepository.fetchCount(creator.getId());
+            int totalCount = getTotalCollectionCount(creator.getId());
             
             List<Collection> collectionList = collectionRepository.findAllByCreatorId(creator.getId(), startIndex, limit);
             boolean hasNext = startIndex + collectionList.size() < totalCount;
@@ -76,6 +77,11 @@ public class CreatorCollectionServiceImpl implements CreatorCollectionService {
         } catch (Exception ex) {
             throw new CreatorCollectionException(ex.getMessage());
         }
+    }
+
+    @Cacheable(value = "collectionCount", key = "#creatorId")
+    private int getTotalCollectionCount(String creatorId) {
+        return collectionRepository.fetchCount(creatorId);
     }
 
     private Map<String, Object> enrichCreatorCollectionItems(List<CollectionLite> collections, int totalCount, boolean hasNext) {
