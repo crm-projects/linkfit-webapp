@@ -13,6 +13,7 @@ import com.server.storefront.util.OTPUtil;
 import com.server.storefront.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -57,8 +58,8 @@ public class StartupServiceImpl implements StartupService {
 
         String otp = OTPUtil.generateOTP();
         try {
-            publishToRedis(credentials, otp);
-            publishToKafka(credentials.getKey(), otp);
+            processUserOtp(credentials, otp);
+//          publishToRedis(credentials, otp);
             publishToAmazonSES();
             return true;
         } catch (Exception ex) {
@@ -66,6 +67,21 @@ public class StartupServiceImpl implements StartupService {
             log.error(ex.getMessage());
             throw new StartupException(ex.getMessage());
         }
+    }
+
+    private void processUserOtp(Credentials credentials, String otp) {
+        String encryptedPassword = PasswordUtil.hashPassword(credentials.getValue());
+        credentials.setValue(encryptedPassword);
+        Map<String, Object> userCredentials = Map.of(
+                USER_CREDENTIALS, credentials,
+                OTP, otp
+        );
+        prepareCache(credentials.getKey(), userCredentials);
+    }
+
+    @CachePut(value = "userCache", key = "#key")
+    private void prepareCache(String key, Map<String, Object> userCredentials) {
+        log.info("Updated cache for {}", key);
     }
 
     private void publishToAmazonSES() {
@@ -80,11 +96,7 @@ public class StartupServiceImpl implements StartupService {
                 OTP, otp
         );
         log.info("Started publishing to Redis");
-        redisRepository.put(credentials.getKey(), userCredentials);
-    }
-
-    private void publishToKafka(String key, String otp) {
-        log.info("Started publishing to Kafka");
+      redisRepository.put(credentials.getKey(), userCredentials);
     }
 
     @Override

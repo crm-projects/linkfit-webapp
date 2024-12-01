@@ -33,6 +33,7 @@ public class EhCacheConfig {
 
         cacheManager.createCache("productCount", jcacheConfig);
         cacheManager.createCache("collectionCount", jcacheConfig);
+        cacheManager.createCache("userCache", jcacheConfig);
 
         return cacheManager;
     }

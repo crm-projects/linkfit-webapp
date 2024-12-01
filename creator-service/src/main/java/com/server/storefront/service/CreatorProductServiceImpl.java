@@ -15,6 +15,7 @@ import com.server.storefront.utils.PartnerUtil;
 import com.server.storefront.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -261,8 +262,8 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
             log.info("Fetching products for {}", creator.getUserName());
 
-            /* TODO : Cache this result as product count won't increase at once */
-            int totalCount = creatorProductRepository.fetchCount(creator.getId());
+            /* TODO : Optimize Cache */
+            int totalCount = getTotalProductCount(creator.getId());
 
             List<CreatorProduct> creatorProducts = creatorProductRepository.findAllByCreatorId(creator.getId(), startIndex, limit);
             boolean hasNext = startIndex + creatorProducts.size() < totalCount;
@@ -291,6 +292,11 @@ public class CreatorProductServiceImpl implements CreatorProductService {
             log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());
         }
+    }
+
+    @Cacheable(value = "productCount", key = "#creatorId")
+    private int getTotalProductCount(String creatorId) {
+        return creatorProductRepository.fetchCount(creatorId);
     }
 
     private Map<String, Object> enrichCreatorProductItems(List<CreatorProductLite> products, int totalCount, boolean hasNext) {
