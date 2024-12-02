@@ -17,10 +17,12 @@ public class Path {
     private static final String SWAGGER = "/v3/api-docs";
     private static final String SWAGGER_UI = "/swagger-ui/";
 
+    private static final String WAITLIST = "/waitlist/signup";
+
     public static Set<String> loadWhiteListedPaths() {
 
         return Set.of(CHECK_USERNAME, GENERATE_OTP, LOGIN,
-                VALIDATE_AND_SIGN_UP, ACTUATOR, HEALTH);
+                VALIDATE_AND_SIGN_UP, ACTUATOR, HEALTH, WAITLIST);
     }
 
     public static Set<String> loadSwaggerPaths() {
