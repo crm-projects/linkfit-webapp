@@ -8,6 +8,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,13 @@ public class JWTAuthFilter implements HandlerInterceptor {
     private static final String BEARER = "Bearer ";
     private static final String SECRET_KEY = "your_secret_key";
 
+    @Value("${jwt.skip.verification}")
+    private boolean skipJwtCheck;
+
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
+
+        if(skipJwtCheck) return true;
 
         String path = request.getRequestURI().substring(4);
         Set<String> whitelistedPaths = Path.loadWhiteListedPaths();
