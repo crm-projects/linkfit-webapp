@@ -22,4 +22,12 @@ public interface CreatorProductRepository extends JpaRepository<CreatorProduct, 
 
     @Query(value = "SELECT * FROM CREATOR_PRODUCT WHERE CREATOR_ID=:creatorId ORDER BY CREATED_TIME LIMIT :limit OFFSET :startIndex", nativeQuery = true)
     List<CreatorProduct> findAllByCreatorId(@Param("creatorId") String creatorId, @Param("startIndex") int startIndex, @Param("limit") int limit);
+
+    @Query(value = """
+            SELECT cp.ID FROM CREATOR_PRODUCT cp
+            WHERE cp.created_by =:username AND cp.ACTIVE_IND = 1 AND cp.DRAFT_IND = 0
+            """,nativeQuery = true)
+    List<String> getProductIdsByUsername(@Param("username") String username);
+
+
 }

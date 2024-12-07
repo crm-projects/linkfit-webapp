@@ -11,12 +11,15 @@ import com.server.storefront.handler.BaseHandler;
 import com.server.storefront.model.*;
 import com.server.storefront.model.Collection;
 import com.server.storefront.repository.*;
+import com.server.storefront.utils.HashUtil;
 import com.server.storefront.utils.PartnerUtil;
 import com.server.storefront.utils.ProductUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -42,6 +45,10 @@ public class CreatorProductServiceImpl implements CreatorProductService {
     private final CollectionRepository collectionRepository;
 
     private final MediaRepository mediaRepository;
+
+    private final ClickRepository clickRepository;
+
+    private final ClickInsightRepository clickInsightRepository;
 
     private static final String PARTNER_HANDLER = "handler";
     private static final String PARTNER = "partner";
@@ -344,7 +351,7 @@ public class CreatorProductServiceImpl implements CreatorProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public RedirectView getLongUrlByCode(String code) throws CreatorProductException, HandlerException {
+    public RedirectView getLongUrlByCode(String code, HttpServletRequest request) throws CreatorProductException, HandlerException {
         if (!StringUtils.hasLength(code)) throw new CreatorProductException(ProductConstants.NO_VALID_CODE);
 
         CreatorProduct product = creatorProductRepository.findByAffiliateCode(code).orElseThrow(() -> new CreatorProductException(ProductConstants.NO_VALID_CODE));
@@ -353,6 +360,7 @@ public class CreatorProductServiceImpl implements CreatorProductService {
         if (StringUtils.hasLength(baseProductUrl)) {
             String creator = product.getCreatedBy();
             if (StringUtils.hasLength(creator)) {
+                logImpression(product.getId(), creator, request);
                 /**
                  * Using {@link RedirectView}
                  */
@@ -360,6 +368,60 @@ public class CreatorProductServiceImpl implements CreatorProductService {
             }
         }
         return null;
+    }
+
+    @Async
+    private void logImpression(String productId, String creator, HttpServletRequest request) throws CreatorProductException {
+        try {
+            String user = request.getHeader("X-STOREFRONT-USER");
+            boolean isOwner = StringUtils.hasLength(user) && user.equals(creator);
+            if (isOwner) {
+                log.info("Impression done by product owner, skipping count increment.");
+                return;
+            }
+            log.info("Impression done by Anonymous call, Updating count.");
+            Optional<Click> productClicks = clickRepository.findByCreatorProductId(productId);
+            if (productClicks.isPresent()) {
+                log.info("Updating existing click record.");
+                updateProductClicks(productClicks.get(), request);
+            } else {
+                log.info("Creating new click record.");
+                logProductClick(productId, request);
+            }
+
+        } catch (Exception e) {
+            throw new CreatorProductException(e.getMessage());
+        }
+    }
+
+    private void logProductClick(String productId, HttpServletRequest request) {
+
+        Click clicks = new Click();
+        clicks.setCreatorProductId(productId);
+        clicks.setTotalClicks(1);
+        clicks.setUniqueClicks(1);
+        clickRepository.save(clicks);
+
+        String ipAddress = HashUtil.hashIP(request.getRemoteAddr());
+        String userAgent = request.getHeader("User-Agent");
+        logClickInsights(clicks, ipAddress, userAgent);
+    }
+
+    private void updateProductClicks(Click click, HttpServletRequest request) {
+
+        click.setTotalClicks(click.getTotalClicks() + 1);
+
+        String ipAddress = HashUtil.hashIP(request.getRemoteAddr());
+        String userAgent = request.getHeader("User-Agent");
+
+        if (!clickInsightRepository.existsByClicksAndIpAddressAndUserAgent(click, ipAddress, userAgent)) {
+            logClickInsights(click, ipAddress, userAgent);
+            int uniqueCount = clickInsightRepository.countUniqueClicks(click.getId());
+            click.setUniqueClicks(uniqueCount);
+            clickRepository.save(click);
+        } else {
+            log.info("Click with same IP and User-Agent exists: {}", click.getId());
+        }
     }
 
     private RedirectView processRedirectUrl(String baseProductUrl) throws HandlerException {
@@ -372,5 +434,14 @@ public class CreatorProductServiceImpl implements CreatorProductService {
         BaseHandler handler = (BaseHandler) objectMap.get(PARTNER_HANDLER);
         String redirectUrl = handler.buildRedirectUrl(builder);
         return new RedirectView(redirectUrl);
+    }
+
+    private void logClickInsights(Click click, String ip, String userAgent) {
+        ClickInsight clickInsights = new ClickInsight();
+        clickInsights.setIpAddress(ip);
+        clickInsights.setUserAgent(userAgent);
+        clickInsights.setLocalDateTime(new Date());
+        clickInsights.setClicks(click);
+        clickInsightRepository.save(clickInsights);
     }
 }

@@ -47,6 +47,9 @@ public class Partner {
     @Column(name = "ACTIVE_IND")
     private boolean activeInd;
 
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
+
     @Nullable
     @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL)
     private List<Campaign> campaignList;

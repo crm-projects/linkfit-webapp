@@ -20,7 +20,7 @@ public class AffiliateController {
     @GetMapping(value = "/share/{code}")
     public RedirectView getLongUrl(@PathVariable("code") String code, HttpServletRequest request) throws CreatorProductException {
         try {
-            return productService.getLongUrlByCode(code);
+            return productService.getLongUrlByCode(code, request);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new CreatorProductException(ex.getMessage());

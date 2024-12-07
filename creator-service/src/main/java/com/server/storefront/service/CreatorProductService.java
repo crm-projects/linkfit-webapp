@@ -6,6 +6,7 @@ import com.server.storefront.exception.CreatorException;
 import com.server.storefront.exception.CreatorProductException;
 import com.server.storefront.exception.HandlerException;
 import com.server.storefront.exception.ProductException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
@@ -20,5 +21,5 @@ public interface CreatorProductService {
 
     boolean deleteProductById(String productId) throws CreatorProductException;
 
-    RedirectView getLongUrlByCode(String code) throws CreatorProductException, HandlerException, HandlerException;
+    RedirectView getLongUrlByCode(String code, HttpServletRequest request) throws CreatorProductException, HandlerException, HandlerException;
 }
