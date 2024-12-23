@@ -17,14 +17,14 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/collections")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class CreatorCollectionController {
 
     private final CreatorCollectionService collectionService;
 
     @JsonView(Views.Private.class)
-    @GetMapping("/{user_name}")
+    @GetMapping("/{user_name}/collections")
     public ResponseEntity<Map<String, Object>> getAllCollectionsByCreator(@PathVariable("user_name") String creatorId,
                                                                           @RequestParam(value = "startIndex", defaultValue = "0") int startIndex,
                                                                           @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -38,7 +38,7 @@ public class CreatorCollectionController {
     }
 
     @JsonView(Views.Private.class)
-    @GetMapping("/{collection_id}")
+    @GetMapping("/collections/{collection_id}")
     public ResponseEntity<CollectionLite> getCollectionById(@PathVariable("collection_id") String collectionId, HttpServletRequest request)
             throws CreatorCollectionException {
         try {
@@ -49,7 +49,7 @@ public class CreatorCollectionController {
         }
     }
 
-    @DeleteMapping(value = "/{collection_id}")
+    @DeleteMapping(value = "/collections/{collection_id}/delete")
     public ResponseEntity<Boolean> deleteCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(collectionService.deleteCollectionById(collectionId), HttpStatus.OK);
@@ -58,7 +58,7 @@ public class CreatorCollectionController {
         }
     }
 
-    @PutMapping(value = "/{collection_id}")
+    @PutMapping(value = "/collections/{collection_id}/update")
     public ResponseEntity<CollectionLite> updateCreatorCollectionById(@PathVariable(value = "collection_id") String collectionId, @RequestBody CollectionLite collection,
                                                                       HttpServletRequest request) throws CreatorProductException {
         try {

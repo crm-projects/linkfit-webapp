@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/profile")
+@RequestMapping("/users")
 public class UserProfileController {
 
     private final PaymentService paymentService;
@@ -26,10 +26,10 @@ public class UserProfileController {
     @Value("${aws.s3.bucket}")
     private static String bucket;
 
-    @PostMapping("/{userId}/payment/info/save")
+    @PostMapping("/{user_name}/payment/info/save")
     public ResponseEntity<UserBankDetails> getUserPaymentDetails(
             @RequestBody UserBankDetails bankDetails,
-            @PathVariable(name = "userId") String userId,
+            @PathVariable(name = "user_name") String userId,
             HttpServletRequest request) {
         try {
             return new ResponseEntity<>(paymentService.getUserPaymentDetails(bankDetails, userId, request), HttpStatus.OK);
@@ -38,14 +38,23 @@ public class UserProfileController {
         }
     }
 
-    @PostMapping("/{userId}/upload")
-    public ResponseEntity<String> uploadImage(@PathVariable("userId") String userName,
+    @PostMapping("/{user_name}/upload")
+    public ResponseEntity<String> uploadImage(@PathVariable("user_name") String userName,
                                               @RequestParam("file") @Valid MultipartFile file) {
         try {
             String url = amazonS3Service.upload(file,userName);
             return ResponseEntity.ok(url);
         } catch (Exception ex) {
             return ResponseEntity.status(500).body("File upload failed: " + ex.getMessage());
+        }
+    }
+
+    @GetMapping("/{user_name}/meta")
+    public ResponseEntity<String> getCreatorProfileInfo(@PathVariable("user_name") String userName, HttpServletRequest request) {
+        try {
+            return ResponseEntity.ok("");
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("");
         }
     }
 

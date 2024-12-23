@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("")
+@RequestMapping("/users")
 public class ProductAnalyticsController {
 
     private final ProductAnalyticService analyticService;
@@ -57,8 +57,8 @@ public class ProductAnalyticsController {
 
 
     @JsonView(Views.Analytics.class)
-    @GetMapping("/product/analytics/{id}")
-    public ResponseEntity<AnalyticsResponseLite> getProductInsightsById(@PathVariable("id") @NonNull String id) {
+    @GetMapping("/product/{p_id}/analytics")
+    public ResponseEntity<AnalyticsResponseLite> getProductInsightsById(@PathVariable("p_id") @NonNull String id) {
 
         if (!StringUtils.hasText(id)) {
             log.error(INVALID_INPUT);

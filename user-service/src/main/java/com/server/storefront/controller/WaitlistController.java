@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "https://linkfit-waitlist.netlify.app")
 @RequestMapping("/waitlist")
 public class WaitlistController {
 

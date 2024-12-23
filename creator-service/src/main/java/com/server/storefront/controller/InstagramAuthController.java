@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/ig")
+@RequestMapping(path = "/users")
 public class InstagramAuthController {
 
 
@@ -31,8 +31,8 @@ public class InstagramAuthController {
         return null;
     }
 
-    @GetMapping("/user/media")
-    public Mono<ResponseEntity<List<IGMedia>>> getUserMediaObjects(@RequestBody String userName, HttpServletRequest request) {
+    @GetMapping("/{user_name}/ig/media")
+    public Mono<ResponseEntity<List<IGMedia>>> getUserMediaObjects(@PathVariable(name = "user_name") String userName, HttpServletRequest request) {
         try {
             return instagramAuthService.retrieveUserMedia(userName);
         } catch (Exception ex) {

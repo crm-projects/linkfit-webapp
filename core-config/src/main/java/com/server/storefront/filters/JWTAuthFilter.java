@@ -1,9 +1,8 @@
 package com.server.storefront.filters;
 
-import com.server.storefront.model.Config;
-import com.server.storefront.repository.ConfigRepository;
-import com.server.storefront.utils.ApplicationConstant;
+import com.server.storefront.configs.InitLoader;
 import com.server.storefront.utils.Path;
+import com.server.storefront.utils.PathMatcherUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -29,24 +27,22 @@ public class JWTAuthFilter implements HandlerInterceptor {
     private static final String BEARER = "Bearer ";
     private static final String SECRET_KEY = "your_secret_key";
 
-    private final ConfigRepository config;;
-
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
 
-        Config appConfig = config.findByProperty(ApplicationConstant.SKIP_JWT_VERIFICATION);
-        if (Boolean.parseBoolean(appConfig.getValue())) {
+        if (InitLoader.getJwtVerification()) {
             return true;
         }
 
         String path = request.getRequestURI().substring(4);
         Set<String> whitelistedPaths = Path.loadWhiteListedPaths();
         Set<String> swaggerPaths = Path.loadSwaggerPaths();
+        Set<String> sharedPaths = Path.loadSharedPaths();
         Predicate<String> isPathWhitelisted = whitelistedPaths::contains;
 
         boolean isSwagger = swaggerPaths.stream().anyMatch(path::startsWith);
 
-        if(isSwagger) {
+        if (isSwagger) {
             log.info("Skipping JWT Validation since condition met for path: {}", path);
             return true;
         }
@@ -58,6 +54,10 @@ public class JWTAuthFilter implements HandlerInterceptor {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(BEARER)) {
+            if (PathMatcherUtil.matchesPath(path, sharedPaths)) {
+                log.info("Allowing this, since request is made by a user");
+                return true;
+            }
             // If JWT is missing, block the request
             log.info("Blocking JWT Validation since condition didn't meet for path: {}", path);
 
@@ -85,15 +85,5 @@ public class JWTAuthFilter implements HandlerInterceptor {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
-    }
-
-    @Override
-    public void postHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, ModelAndView model) {
-        /* TODO document why this method is empty */
-    }
-
-    @Override
-    public void afterCompletion(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object, Exception exception) {
-        /* TODO document why this method is empty */
     }
 }

@@ -15,7 +15,7 @@ public class WaitlistService {
 
     private final WaitlistRepository waitlistRepository;
 
-    private static final String EMAIL_PATTERN = "^[a-z0-9_-]+@gmail.com$";
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
 
     @Transactional
     public boolean addUser(Waitlist waitlist) {
@@ -25,7 +25,7 @@ public class WaitlistService {
         }
 
         if (!StringUtils.hasLength(waitlist.getUserName()) ||
-                (!StringUtils.hasLength(waitlist.getEmailAddress()) || waitlist.getEmailAddress().matches(EMAIL_PATTERN))) {
+                (!StringUtils.hasLength(waitlist.getEmailAddress()) || !waitlist.getEmailAddress().matches(EMAIL_PATTERN))) {
             throw new RuntimeException("Invalid Input details are provided. Please try again");
         }
 

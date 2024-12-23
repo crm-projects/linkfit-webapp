@@ -20,13 +20,13 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/products")
+@RequestMapping("/users")
 public class CreatorProductController {
 
     private final CreatorProductService productService;
 
     @JsonView(Views.Public.class)
-    @PostMapping("/{user_name}/add")
+    @PostMapping("/{user_name}/products/add")
     public ResponseEntity<Map<String, Object>> addProducts(@PathVariable("user_name") String userName,
                                                            @RequestBody ProductNode productNode,
                                                            HttpServletRequest request) throws CreatorProductException {
@@ -40,7 +40,7 @@ public class CreatorProductController {
         }
     }
 
-    @GetMapping(value = "/{user_name}")
+    @GetMapping(value = "/{user_name}/products")
     public ResponseEntity<Map<String, Object>> getAllProductsByCreator(@PathVariable("user_name") String userName,
                                                                        @RequestParam(value = "startIndex", defaultValue = "0") int startIndex,
                                                                        @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -52,8 +52,8 @@ public class CreatorProductController {
         }
     }
 
-    @GetMapping(value = "/product/{pid}")
-    public ResponseEntity<CreatorProductLite> getCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
+    @GetMapping(value = "/products/{p_id}")
+    public ResponseEntity<CreatorProductLite> getCreatorProductById(@PathVariable(value = "p_id") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             if (!StringUtils.hasLength(productId)) {
                 throw new CreatorProductException("Invalid product id provided. Please try again");
@@ -64,8 +64,8 @@ public class CreatorProductController {
         }
     }
 
-    @DeleteMapping(value = "/{pid}/delete")
-    public ResponseEntity<Boolean> deleteCreatorProductById(@PathVariable(value = "pid") String productId, HttpServletRequest request) throws CreatorProductException {
+    @DeleteMapping(value = "/products/delete/{p_id}")
+    public ResponseEntity<Boolean> deleteCreatorProductById(@PathVariable(value = "p_id") String productId, HttpServletRequest request) throws CreatorProductException {
         try {
             return new ResponseEntity<>(productService.deleteProductById(productId), HttpStatus.OK);
         } catch (Exception ex) {
