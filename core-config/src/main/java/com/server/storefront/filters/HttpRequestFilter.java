@@ -21,6 +21,7 @@ public class HttpRequestFilter implements HandlerInterceptor {
     private static final String WHOAMI = "whoami";
     private static final String CREATOR = "creator";
     private static final String USER = "user";
+    private static final String EXCLUDE_AUTH = "ignoreAuth";
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
@@ -29,6 +30,7 @@ public class HttpRequestFilter implements HandlerInterceptor {
         if (PathMatcherUtil.matchesPath(path, sharedPaths)) {
             log.info("Request has fallen into Http Request Filter.");
             request.setAttribute(WHOAMI, USER);
+            request.setAttribute(EXCLUDE_AUTH, true);
             log.info("User request is successfully scrubbed and passed down");
             return true;
         }

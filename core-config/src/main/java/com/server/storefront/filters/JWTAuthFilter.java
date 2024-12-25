@@ -30,7 +30,9 @@ public class JWTAuthFilter implements HandlerInterceptor {
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object object) {
 
-        if (InitLoader.getJwtVerification()) {
+        boolean ignoreAuth = (boolean) request.getAttribute("ignoreAuth");
+
+        if (InitLoader.getJwtVerification() || ignoreAuth) {
             return true;
         }
 
@@ -54,10 +56,6 @@ public class JWTAuthFilter implements HandlerInterceptor {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(BEARER)) {
-            if (PathMatcherUtil.matchesPath(path, sharedPaths)) {
-                log.info("Allowing this, since request is made by a user");
-                return true;
-            }
             // If JWT is missing, block the request
             log.info("Blocking JWT Validation since condition didn't meet for path: {}", path);
 

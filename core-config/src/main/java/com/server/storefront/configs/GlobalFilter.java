@@ -21,8 +21,8 @@ public class GlobalFilter implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtAuthFilter);
         registry.addInterceptor(httpRequestFilter);
+        registry.addInterceptor(jwtAuthFilter);
         registry.addInterceptor(domainFilter);
     }
 }
