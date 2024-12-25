@@ -11,10 +11,10 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new io.swagger.v3.oas.models.info.Info()
-                        .title("API Documentation")
+                        .title("Linkfit API Documentation")
                         .version("v1")
-                        .description("API for Linkfit"))
-                .addServersItem(new io.swagger.v3.oas.models.servers.Server().url("https://linkfit.app/api"));  // Ensure Swagger uses HTTPS
+                        .description("API for Linkfit services"))
+                .addServersItem(new io.swagger.v3.oas.models.servers.Server().url("https://api.linkfit.app"));  // Ensure Swagger uses HTTPS
     }
 }
 
