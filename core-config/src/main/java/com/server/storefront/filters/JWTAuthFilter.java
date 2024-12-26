@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Base64;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -36,7 +37,7 @@ public class JWTAuthFilter implements HandlerInterceptor {
             return true;
         }
 
-        String path = request.getRequestURI().substring(4);
+        String path = request.getRequestURI();
         Set<String> whitelistedPaths = Path.loadWhiteListedPaths();
         Set<String> swaggerPaths = Path.loadSwaggerPaths();
         Set<String> sharedPaths = Path.loadSharedPaths();
@@ -72,7 +73,7 @@ public class JWTAuthFilter implements HandlerInterceptor {
         try {
 
             Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                    .verifyWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY)))
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
