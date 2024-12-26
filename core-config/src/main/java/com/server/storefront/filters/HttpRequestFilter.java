@@ -34,6 +34,7 @@ public class HttpRequestFilter implements HandlerInterceptor {
             log.info("User request is successfully scrubbed and passed down");
             return true;
         }
+        request.setAttribute(EXCLUDE_AUTH, false);
         request.setAttribute(WHOAMI, CREATOR);
         return true;
     }
